@@ -39,10 +39,8 @@ class ExitoScrapingSpider(Spider):
 
 
 	def start_request(self):
-		n_cat = 0 
-			yield Request(url = url + '/category',
-						  callback = self.parse,
-						  meta = {'n_cat': n_cat})
+		yield Request(url = url + '/category',
+					  callback = self.parse)
 
 
 	def parse(self, response):
@@ -51,7 +49,7 @@ class ExitoScrapingSpider(Spider):
 		print('\n', '*'*40, '\n')
 
 		try: n_cat = response.meta['n_cat']
-		except: n_cat = 0	
+		except: n_cat = 0
 
 		print('\n', '*'*40, '\n', response.status)
 		print(response.url)
@@ -62,6 +60,9 @@ class ExitoScrapingSpider(Spider):
 		print(categories)
 
 		category = categories[n_cat]
+
+		if 'deportes' in category:
+			category = category.split('-tiempo')[0]			
 
 		yield Request(url = 'https://www.exito.com' + category,
 					  callback = self.prod_parse,
@@ -140,13 +141,16 @@ class ExitoScrapingSpider(Spider):
 			# print(prod_types)
 		
 		for prod_type in prod_types:
+			cache = {'cat_name': ['NA']}
 			if 'comida' not in prod_type:
-				cache = {'cat_name': ['NA']}
+				
 				pag = 1
 				exten = ext_func(prod_type)
 
-				while True:
+				if '&page' in prod_type:
+					prod_type = prod_type.split('&page')[0]
 
+				while True:
 					url_cat_pag = 'https://www.exito.com' + prod_type + exten + 'page=' + str(pag)
 
 					trys_prod = 1
@@ -158,7 +162,7 @@ class ExitoScrapingSpider(Spider):
 						except:
 							print('\n', '#'*15, 'Fallo intento', '#'*15, '\n')
 							trys_prod +=1
-							#driver.get(url_cat_pag)
+							
 					pag_sel = Selector(text= driver.page_source)
 					
 					print('Antes de dormir')
@@ -204,6 +208,7 @@ class ExitoScrapingSpider(Spider):
 								  '\n\tNormal price:\t', normal_price,
 								  '\n\tDiscount price:\t', disc_price)
 
+
 							if cat_name != [] and type(cat_name) == list:
 								cat_name = cat_name[-1]
 
@@ -224,7 +229,11 @@ class ExitoScrapingSpider(Spider):
 								   'image_url': image_url}
 
 							print('#'*80)
-						pag += 1
+
+						if 'chaquetas&map' not in prod_type and 'zromanella?' not in prod_type:
+							pag += 1
+						else:
+							break
 					
 					else:
 						print('################################ Entra al else #################################')
