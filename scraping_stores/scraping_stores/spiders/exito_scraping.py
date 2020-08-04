@@ -3,6 +3,7 @@ from scrapy.http import Request
 from scrapy.selector import Selector
 
 from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
 
 import os
 
@@ -39,8 +40,9 @@ class ExitoScrapingSpider(Spider):
 
 
 	def start_request(self):
-		yield Request(url = url + '/category',
-					  callback = self.parse)
+		for url in start_urls:
+			yield Request(url = url + '/category',
+						  callback = self.parse)
 
 
 	def parse(self, response):
@@ -49,7 +51,7 @@ class ExitoScrapingSpider(Spider):
 		print('\n', '*'*40, '\n')
 
 		try: n_cat = response.meta['n_cat']
-		except: n_cat = 0
+		except: n_cat = 0 ################################################################################################# OJO !!
 
 		print('\n', '*'*40, '\n', response.status)
 		print(response.url)
@@ -192,15 +194,22 @@ class ExitoScrapingSpider(Spider):
 						print('$'*40)
 
 						for producto in productos: 
-							
-							prod_name = producto.xpath('.//*[@class= "vtex-store-components-3-x-productNameContainer mv0 test"]/span/text()').extract_first()
-							prod_name = prod_name.replace('\\', '.')
-							prod_name = prod_name.replace('/', '.')
+							try:
+								prod_name = producto.xpath('.//*[@class= "vtex-store-components-3-x-productNameContainer mv0 test"]/span/text()').extract_first()
+								prod_name = prod_name.replace('\\', '.')
+								prod_name = prod_name.replace('/', '.')
 
-							normal_price = producto.xpath('.//*[@style= "display: initial;"]//span/text()').extract()[0]
-							disc_price = producto.xpath('.//*[@style= "display: initial;"]//span/text()').extract()[-1]
-							image_url = producto.xpath('.//*[@class= "vtex-product-summary-2-x-imageNormal vtex-product-summary-2-x-image"]/@src').extract_first()
+								normal_price = producto.xpath('.//*[@style= "display: initial;"]//span/text()').extract()[0]
+								disc_price = producto.xpath('.//*[@style= "display: initial;"]//span/text()').extract()[-1]
+								image_url = producto.xpath('.//*[@class= "vtex-product-summary-2-x-imageNormal vtex-product-summary-2-x-image"]/@src').extract_first()
 							
+							except:
+								driver.find_element_by_css_selector('.exito-autocomplete-3').click()
+								driver.find_element_by_css_selector('#react-select-2-input').send_keys('Bogotá')
+								driver.find_element_by_css_selector('#react-select-2-input').send_keys(Keys.ENTER)
+								driver.find_element_by_css_selector('.exito-geolocation-3-x-primaryButton').click()
+								break
+
 
 							print('\n', '#'*50, 'Estamos en la pagina ', pag, '#'*50, '\n')
 							print('\nCategoria:\t', cat_name,
