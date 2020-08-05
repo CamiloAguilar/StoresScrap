@@ -51,7 +51,7 @@ class ExitoScrapingSpider(Spider):
 		print('\n', '*'*40, '\n')
 
 		try: n_cat = response.meta['n_cat']
-		except: n_cat = 0 ################################################################################################# OJO !!
+		except: n_cat = 0 
 
 		print('\n', '*'*40, '\n', response.status)
 		print(response.url)
@@ -199,8 +199,30 @@ class ExitoScrapingSpider(Spider):
 								prod_name = prod_name.replace('\\', '.')
 								prod_name = prod_name.replace('/', '.')
 
-								normal_price = producto.xpath('.//*[@style= "display: initial;"]//span/text()').extract()[0]
-								disc_price = producto.xpath('.//*[@style= "display: initial;"]//span/text()').extract()[-1]
+								normal_price = producto.xpath('.//*[@style= "display: initial;"]//span/text()').extract()
+
+
+
+								try:
+									button = driver.find_element_by_css_selector('.exito-geolocation-3-x-primaryButton')
+								except:
+									button = []
+								
+								print(normal_price, '------')
+
+								if normal_price != [] and button == []:
+									if normal_price[-1] == 'otros':
+										normal_price = producto.xpath('.//*[@style= "display: initial;"]//span/text()').extract()[0]
+										disc_price = producto.xpath('.//*[@style= "display: initial;"]//span/text()').extract()[-2]
+									else:
+										normal_price = producto.xpath('.//*[@style= "display: initial;"]//span/text()').extract()[0]
+										disc_price = producto.xpath('.//*[@style= "display: initial;"]//span/text()').extract()[-1]
+
+								elif button != []:
+									raise IndexError()
+								else:
+									normal_price = 0
+									disc_price = 0
 								image_url = producto.xpath('.//*[@class= "vtex-product-summary-2-x-imageNormal vtex-product-summary-2-x-image"]/@src').extract_first()
 							
 							except:
