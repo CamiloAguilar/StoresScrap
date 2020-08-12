@@ -51,7 +51,7 @@ class ExitoScrapingSpider(Spider):
 		print('\n', '*'*40, '\n')
 
 		try: n_cat = response.meta['n_cat']
-		except: n_cat = 4 ###################################################### OJO !!
+		except: n_cat = 0 ###################################################### OJO !!
 
 		print('\n', '*'*40, '\n', response.status)
 		print(response.url)
