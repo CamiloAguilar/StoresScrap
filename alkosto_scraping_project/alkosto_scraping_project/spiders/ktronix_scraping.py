@@ -104,4 +104,5 @@ class KtronixScrapingSpider(Spider):
 						  meta= {'n_cat': n_cat}) 
 
 		else:
+			driver.quit()
 			print('\n', '='*20,'\n', 'TAL PARECE QUE SE EXTRAJO TODA LA INFORMACION DE LA PAGINA !!','\n', '='*20, '\n')

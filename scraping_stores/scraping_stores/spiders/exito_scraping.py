@@ -30,7 +30,7 @@ def ext_func(prod_variable):
 driver = webdriver.Firefox()
 driver.maximize_window()
 sleep(10)
-driver.set_page_load_timeout(25)
+driver.set_page_load_timeout(45)
 
 
 class ExitoScrapingSpider(Spider):
@@ -51,7 +51,7 @@ class ExitoScrapingSpider(Spider):
 		print('\n', '*'*40, '\n')
 
 		try: n_cat = response.meta['n_cat']
-		except: n_cat = 0 
+		except: n_cat = 4 ###################################################### OJO !!
 
 		print('\n', '*'*40, '\n', response.status)
 		print(response.url)

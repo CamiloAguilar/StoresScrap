@@ -8,11 +8,11 @@ from selenium.common.exceptions import ElementClickInterceptedException
 from time import sleep
 
 
-options = webdriver.FirefoxOptions()
-options.add_argument('--headless')
-driver = webdriver.Firefox(options = options)
+# options = webdriver.FirefoxOptions()
+# options.add_argument('--headless')
+# driver = webdriver.Firefox(options = options)
 
-#driver = webdriver.Firefox()
+driver = webdriver.Firefox()
 
 
 class AlkostoScrapingSpider(Spider):
@@ -24,7 +24,7 @@ class AlkostoScrapingSpider(Spider):
 	def parse(self, response):
 
 		try: n_cat = response.meta['n_cat']
-		except: n_cat = 14 ###################################################################### OJO !!
+		except: n_cat = 0
 
 		print('\n','#'*20, 'Este es n_cat !!', '\n', n_cat)
 
@@ -72,6 +72,7 @@ class AlkostoScrapingSpider(Spider):
 					  callback= self.category_parse,
 					  meta= {'home_n_cat': home_n_cat,
 							 'sub_categories': sub_categories,
+							 'sub_category': sub_category,
 							 'n_cat': n_cat,
 							 'categories': categories,
 							 'category': category})
@@ -83,12 +84,15 @@ class AlkostoScrapingSpider(Spider):
 		categories = response.meta['categories']
 		category = response.meta['category']
 
+
 		try: 
 			home_n_cat = response.meta['home_n_cat']
 			sub_categories = response.meta['sub_categories']
+			sub_category = response.meta['sub_category']
 		except: 
 			home_n_cat = 0
 			sub_categories = []
+			sub_category = ''
 
 		try: pag = response.meta['pag']
 		except: pag = 1
@@ -134,6 +138,10 @@ class AlkostoScrapingSpider(Spider):
 		
 		if next_pag != []:
 			pag += 1
+
+			if 'hogar' in response.url:
+				category = sub_category
+
 			yield Request(url= category + '?p=' + str(pag),
 						 callback= self.category_parse,
 						 meta= {'n_cat': n_cat,
@@ -141,11 +149,9 @@ class AlkostoScrapingSpider(Spider):
 								'category': category,
 								'home_n_cat': home_n_cat,
 								'sub_categories': sub_categories,
-								'home_n_cat': home_n_cat,
-								'sub_categories': sub_categories,
+								'sub_category': sub_category,
 								'pag': pag},
 						dont_filter= True)
-
 
 
 
@@ -169,6 +175,7 @@ class AlkostoScrapingSpider(Spider):
 							  meta= {'n_cat': n_cat}) 
 
 		else:
+			print('ENTRA AL ELSE PARA EL MERCADO !!!!')
 			print('\n',response.url)
 			mercado_link = response.xpath('//*[@class= "btn-ver-mas center"]/@href').extract_first()
 			
@@ -248,8 +255,18 @@ class AlkostoScrapingSpider(Spider):
 						   'image_url': image_url}
 
 				
-				next_button= driver.find_elements_by_xpath('/html/body/div[1]/div/div[2]/div/div/div[2]/ul/li/a')
-				if next_button != []:
+				next_button= driver.find_elements_by_xpath('/html/body/div[1]/div/div[2]/div/div/div[2]/ul/li')
+				button_test = mercado_pag_sel.xpath('/html/body/div[1]/div/div[2]/div/div/div[2]/ul/li')
+
+				if button_test == []:
+					pass
+				else:
+					button_test = mercado_pag_sel.xpath('/html/body/div[1]/div/div[2]/div/div/div[2]/ul/li')[-1]
+
+
+				button_test = button_test.xpath('.//button[@class= "ant-pagination-item-link"]/@disabled')
+				
+				if next_button != [] and button_test == []:
 					#next_button= driver.find_elements_by_xpath('/html/body/div[1]/div/div[2]/div/div/div[2]/ul/li/a')[-1].click()
 					next_button[-1].click()
 					sleep(3)
@@ -274,3 +291,7 @@ class AlkostoScrapingSpider(Spider):
 					print('\n', '='*20,'\n', 'TAL PARECE QUE SE EXTRAJO TODA LA INFORMACION DE LA PAGINA !!','\n', '='*20, '\n')
 					driver.quit()
 					break
+
+
+try: driver.quit()
+except: pass
