@@ -176,7 +176,7 @@ class FalabellaScrapingSpider(Spider):
 						   'disc_price': disc_price,
 						   'image_url': image_url}
 
-			   	print('Antes del click')
+				print('Antes del click')
 				driver.find_element_by_css_selector('#testId-pagination-top-arrow-right').click()
 				print('Despues del click')	
 				
