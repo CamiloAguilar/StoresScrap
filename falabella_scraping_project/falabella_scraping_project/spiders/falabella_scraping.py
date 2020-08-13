@@ -115,9 +115,17 @@ class FalabellaScrapingSpider(Spider):
 		pag = 1
 
 		while True:
-			driver.execute_script('document.body.style.MozTransform = "scale(0.3)";')
-			driver.execute_script('document.body.style.MozTransformOrigin = "0 0";')
-			driver.execute_script("window.scrollTo(0, window.scrollY - 10000)")
+			try:	
+				driver.execute_script('document.body.style.MozTransform = "scale(0.3)";')
+				driver.execute_script('document.body.style.MozTransformOrigin = "0 0";')
+				driver.execute_script("window.scrollTo(0, window.scrollY - 10000)")
+			except:
+				driver.refresh()
+				sleep(5)
+				driver.execute_script('document.body.style.MozTransform = "scale(0.3)";')
+				driver.execute_script('document.body.style.MozTransformOrigin = "0 0";')
+				driver.execute_script("window.scrollTo(0, window.scrollY - 10000)")
+
 			sleep(1.5)
 
 			for scroll in range(3):
@@ -168,8 +176,10 @@ class FalabellaScrapingSpider(Spider):
 						   'disc_price': disc_price,
 						   'image_url': image_url}
 
+			   	print('Antes del click')
 				driver.find_element_by_css_selector('#testId-pagination-top-arrow-right').click()
-					
+				print('Despues del click')	
+				
 				pag += 1
 
 			except NoSuchElementException:
@@ -181,9 +191,9 @@ class FalabellaScrapingSpider(Spider):
 				while trys2 <= 3:
 					try:
 						print('\n', '#'*15,'FALLO EL CLICK, ¡ COMENZAMOS !', '#'*15, '\n') 
-						driver.get(driver.current_url)
-						#sleep(10)
+						driver.refresh()
 						break
+						
 					except:
 						print('FALLO INTENTO DEL CLICK')
 						trys2 += 1
