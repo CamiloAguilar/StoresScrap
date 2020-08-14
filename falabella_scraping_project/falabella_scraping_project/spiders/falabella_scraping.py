@@ -17,7 +17,6 @@ driver.set_page_load_timeout(45)
 
 
 
-
 def unic_func(url_list):
 	new_url_list = []
 	for url in url_list:
@@ -112,128 +111,235 @@ class FalabellaScrapingSpider(Spider):
 
 
 	def main_parse_cats(self, response):
+
 		global driver
-		categories = response.meta['categories']
-		n_cat = response.meta['n_cat']
+		try:
+			categories = response.meta['categories']
+			n_cat = response.meta['n_cat']
 
-		trys= 1
+			trys= 1
 
-		while trys <= 3:
-			try:
-				print('\n', '#'*15,'Estamos en el intento', trys, '#'*15, '\n') 
-				driver.get(response.url)
-				break
-			except:
-				print('FALLO INTENTO')
-				trys += 1
+			while trys <= 3:
+				try:
+					print('\n', '#'*15,'Estamos en el intento', trys, '#'*15, '\n') 
+					driver.get(response.url)
+					break
+				except:
+					print('FALLO INTENTO')
+					trys += 1
 
-		sleep(3)
-		
-
-		pag = 1
-
-		while True:
-			#try: 
-			cache_url = driver.current_url
-			#except: cache_url = None
-
-			print('\n', cache_url, '----------> Este es el cache url', '\n')
-
-			try:	
-				driver.execute_script('document.body.style.MozTransform = "scale(0.3)";')
-				driver.execute_script('document.body.style.MozTransformOrigin = "0 0";')
-				driver.execute_script("window.scrollTo(0, window.scrollY - 10000)")
-			except:
-				driver.refresh()
-				sleep(5)
-				driver.execute_script('document.body.style.MozTransform = "scale(0.3)";')
-				driver.execute_script('document.body.style.MozTransformOrigin = "0 0";')
-				driver.execute_script("window.scrollTo(0, window.scrollY - 10000)")
-
-			sleep(1.5)
-
-			for scroll in range(3):
-
-				if scroll == 0:
-					driver.execute_script("window.scrollTo(0, window.scrollY + 300)")
-					sleep(1)
-				else:
-					driver.execute_script("window.scrollTo(0, window.scrollY + 635)")
-					sleep(1)
-
-			categ_prods_page = Selector(text= driver.page_source)
-			prods = categ_prods_page.xpath('//*[@id= "testId-searchResults-products"]/div')
+			sleep(3)
 			
-			cat_name = categ_prods_page.xpath('.//*[@class= "jsx-1134953126 brand-title-container collection-title"]//text()').extract_first()
 
-			if cat_name == None:
-				cat_name = categ_prods_page.xpath('.//*[@class= "jsx-3139645404 categoty-title-container"]/span//text()').extract_first()
+			pag = 1
 
-			try:
-				for prod in prods:
+			while True:
+				#try: 
+				cache_url = driver.current_url
+				#except: cache_url = None
 
-					prod_name = prod.xpath('.//b[@class= "jsx-3773340100 copy2 primary  jsx-185326735 normal    pod-subTitle"]/text()').extract_first()
+				print('\n', cache_url, '----------> Este es el cache url', '\n')
 
-					if prod_name == None:
-						prod_name = prod.xpath('.//b[@class= "jsx-287641535 title2 primary  jsx-185326735 bold    pod-subTitle"]/text()').extract_first()
+				try:	
+					driver.execute_script('document.body.style.MozTransform = "scale(0.3)";')
+					driver.execute_script('document.body.style.MozTransformOrigin = "0 0";')
+					driver.execute_script("window.scrollTo(0, window.scrollY - 10000)")
+				except:
+					driver.refresh()
+					sleep(5)
+					driver.execute_script('document.body.style.MozTransform = "scale(0.3)";')
+					driver.execute_script('document.body.style.MozTransformOrigin = "0 0";')
+					driver.execute_script("window.scrollTo(0, window.scrollY - 10000)")
 
-					print(prod_name, '---------> prod name')
+				sleep(1.5)
 
-					normal_price= prod.xpath('.//ol/li//span/text()').extract()
-					normal_price= [price for price in normal_price if '$' in price]
+				for scroll in range(3):
 
-					disc_price = normal_price[0]
-					normal_price = normal_price[-1]
+					if scroll == 0:
+						driver.execute_script("window.scrollTo(0, window.scrollY + 300)")
+						sleep(1)
+					else:
+						driver.execute_script("window.scrollTo(0, window.scrollY + 635)")
+						sleep(1)
 
-					image_url = prod.xpath('.//img/@src').extract_first()
-
-					print('\n', '#'*50, 'Estamos en la pagina ', pag, '#'*50, '\n')
-					print('\nCategoria:\t', cat_name,
-						  '\n\tProducto:\t', prod_name,
-						  '\n\tNormal price:\t', normal_price,
-						  '\n\tDiscount price:\t', disc_price)
-
-
-					yield {'cat_name': cat_name,
-						   'prod_name': prod_name,
-						   'normal_price': normal_price,
-						   'disc_price': disc_price,
-						   'image_url': image_url}
-
-				print('Antes del click')
-				driver.find_element_by_css_selector('#testId-pagination-top-arrow-right').click()
-				print('Despues del click')	
+				categ_prods_page = Selector(text= driver.page_source)
+				prods = categ_prods_page.xpath('//*[@id= "testId-searchResults-products"]/div')
 				
-				pag += 1
+				cat_name = categ_prods_page.xpath('.//*[@class= "jsx-1134953126 brand-title-container collection-title"]//text()').extract_first()
 
-			except NoSuchElementException:
-				break
+				if cat_name == None:
+					cat_name = categ_prods_page.xpath('.//*[@class= "jsx-3139645404 categoty-title-container"]/span//text()').extract_first()
 
-			except TimeoutException:
-				trys2 = 1
+				try:
+					for prod in prods:
 
-				while trys2 <= 3:
-					try:
-						print('\n', '#'*15,'FALLO EL CLICK, ¡ COMENZAMOS !', '#'*15, '\n') 
-						driver.refresh()
-						break
-						
-					except:
-						print('FALLO INTENTO DEL CLICK')
-						trys2 += 1
+						prod_name = prod.xpath('.//b[@class= "jsx-3773340100 copy2 primary  jsx-185326735 normal    pod-subTitle"]/text()').extract_first()
 
-				continue
+						if prod_name == None:
+							prod_name = prod.xpath('.//b[@class= "jsx-287641535 title2 primary  jsx-185326735 bold    pod-subTitle"]/text()').extract_first()
 
-			except WebDriverException:
-				driver = webdriver.Firefox()
-				driver.maximize_window()
-				sleep(10)
-				driver.set_page_load_timeout(45)
+						print(prod_name, '---------> prod name')
 
-				driver.get(cache_url)
-				sleep(10)
+						normal_price= prod.xpath('.//ol/li//span/text()').extract()
+						normal_price= [price for price in normal_price if '$' in price]
 
-				continue
+						disc_price = normal_price[0]
+						normal_price = normal_price[-1]
+
+						image_url = prod.xpath('.//img/@src').extract_first()
+
+						print('\n', '#'*50, 'Estamos en la pagina ', pag, '#'*50, '\n')
+						print('\nCategoria:\t', cat_name,
+							  '\n\tProducto:\t', prod_name,
+							  '\n\tNormal price:\t', normal_price,
+							  '\n\tDiscount price:\t', disc_price)
+
+
+						yield {'cat_name': cat_name,
+							   'prod_name': prod_name,
+							   'normal_price': normal_price,
+							   'disc_price': disc_price,
+							   'image_url': image_url}
+
+					print('Antes del click')
+					driver.find_element_by_css_selector('#testId-pagination-top-arrow-right').click()
+					print('Despues del click')	
+					
+					pag += 1
+
+				except NoSuchElementException:
+					break
+
+				except TimeoutException:
+					trys2 = 1
+
+					while trys2 <= 3:
+						try:
+							print('\n', '#'*15,'FALLO EL CLICK, ¡ COMENZAMOS !', '#'*15, '\n') 
+							driver.refresh()
+							break
+							
+						except:
+							print('FALLO INTENTO DEL CLICK')
+							trys2 += 1
+
+					continue
+
+
+
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
+		except WebDriverException:
+			print('Entra al except de la excepcion que es !! ---------------------------------')
+
+			driver = webdriver.Firefox()
+			driver.maximize_window()
+			sleep(10)
+			driver.set_page_load_timeout(45)
+
+			driver.get(cache_url)
+			sleep(10)
+
+
+
+			pag = 1
+
+			while True:
+				#try: 
+				cache_url = driver.current_url
+				#except: cache_url = None
+
+				print('\n', cache_url, '----------> Este es el cache url', '\n')
+
+				try:	
+					driver.execute_script('document.body.style.MozTransform = "scale(0.3)";')
+					driver.execute_script('document.body.style.MozTransformOrigin = "0 0";')
+					driver.execute_script("window.scrollTo(0, window.scrollY - 10000)")
+				except:
+					driver.refresh()
+					sleep(5)
+					driver.execute_script('document.body.style.MozTransform = "scale(0.3)";')
+					driver.execute_script('document.body.style.MozTransformOrigin = "0 0";')
+					driver.execute_script("window.scrollTo(0, window.scrollY - 10000)")
+
+				sleep(1.5)
+
+				for scroll in range(3):
+
+					if scroll == 0:
+						driver.execute_script("window.scrollTo(0, window.scrollY + 300)")
+						sleep(1)
+					else:
+						driver.execute_script("window.scrollTo(0, window.scrollY + 635)")
+						sleep(1)
+
+				categ_prods_page = Selector(text= driver.page_source)
+				prods = categ_prods_page.xpath('//*[@id= "testId-searchResults-products"]/div')
+				
+				cat_name = categ_prods_page.xpath('.//*[@class= "jsx-1134953126 brand-title-container collection-title"]//text()').extract_first()
+
+				if cat_name == None:
+					cat_name = categ_prods_page.xpath('.//*[@class= "jsx-3139645404 categoty-title-container"]/span//text()').extract_first()
+
+				try:
+					for prod in prods:
+
+						prod_name = prod.xpath('.//b[@class= "jsx-3773340100 copy2 primary  jsx-185326735 normal    pod-subTitle"]/text()').extract_first()
+
+						if prod_name == None:
+							prod_name = prod.xpath('.//b[@class= "jsx-287641535 title2 primary  jsx-185326735 bold    pod-subTitle"]/text()').extract_first()
+
+						print(prod_name, '---------> prod name')
+
+						normal_price= prod.xpath('.//ol/li//span/text()').extract()
+						normal_price= [price for price in normal_price if '$' in price]
+
+						disc_price = normal_price[0]
+						normal_price = normal_price[-1]
+
+						image_url = prod.xpath('.//img/@src').extract_first()
+
+						print('\n', '#'*50, 'Estamos en la pagina ', pag, '#'*50, '\n')
+						print('\nCategoria:\t', cat_name,
+							  '\n\tProducto:\t', prod_name,
+							  '\n\tNormal price:\t', normal_price,
+							  '\n\tDiscount price:\t', disc_price)
+
+
+						yield {'cat_name': cat_name,
+							   'prod_name': prod_name,
+							   'normal_price': normal_price,
+							   'disc_price': disc_price,
+							   'image_url': image_url}
+
+					print('Antes del click')
+					driver.find_element_by_css_selector('#testId-pagination-top-arrow-right').click()
+					print('Despues del click')	
+					
+					pag += 1
+
+				except NoSuchElementException:
+					break
+
+				except TimeoutException:
+					trys2 = 1
+
+					while trys2 <= 3:
+						try:
+							print('\n', '#'*15,'FALLO EL CLICK, ¡ COMENZAMOS !', '#'*15, '\n') 
+							driver.refresh()
+							break
+							
+						except:
+							print('FALLO INTENTO DEL CLICK')
+							trys2 += 1
+
+					continue
+			
+
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
 
 
 
