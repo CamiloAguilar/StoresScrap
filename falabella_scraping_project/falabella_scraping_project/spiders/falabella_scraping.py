@@ -112,7 +112,7 @@ class FalabellaScrapingSpider(Spider):
 
 
 	def main_parse_cats(self, response):
-		
+		global driver
 		categories = response.meta['categories']
 		n_cat = response.meta['n_cat']
 
@@ -133,7 +133,12 @@ class FalabellaScrapingSpider(Spider):
 		pag = 1
 
 		while True:
+			#try: 
 			cache_url = driver.current_url
+			#except: cache_url = None
+
+			print('\n', cache_url, '----------> Este es el cache url', '\n')
+
 			try:	
 				driver.execute_script('document.body.style.MozTransform = "scale(0.3)";')
 				driver.execute_script('document.body.style.MozTransformOrigin = "0 0";')
