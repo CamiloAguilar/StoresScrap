@@ -3,7 +3,7 @@ from scrapy.http import Request
 from scrapy.selector import Selector
 
 from selenium import webdriver
-from selenium.common.exceptions import NoSuchElementException,TimeoutException
+from selenium.common.exceptions import NoSuchElementException, TimeoutException, WebDriverException
 
 
 from time import sleep
@@ -57,7 +57,25 @@ class FalabellaScrapingSpider(Spider):
 		gen_categories = main_page_source.xpath('.//*[@class= "ThirdLevelItems_submenuElementLiBold__1aiT_"]/@href').extract()
 
 		gen_categories = unic_func(gen_categories)
-		categories = list(dict.fromkeys(gen_categories))
+		gen_categories = list(dict.fromkeys(gen_categories))
+
+		categories = []
+		for cate in gen_categories:
+			#print(cate, '----->', cate.count('?isPLP=1'))
+			if cate.count('?isPLP=1') == 2:
+				cate = cate.replace('?isPLP=1', '', 1)
+				#print(cate, '----->', cate.count('?isPLP=1'), '\n')
+				categories.append(cate)
+			elif cate.count('?isPLP=1') == 3:
+				cate = cate.replace('?isPLP=1', '', 2)
+				#print(cate, '----->', cate.count('?isPLP=1'), '\n')
+				categories.append(cate)
+			else:
+				#print(cate, '----->', cate.count('?isPLP=1'), '\n')
+				categories.append(cate)
+
+
+		#sleep(60)
 
 
 		yield Request(url= response.url,
@@ -115,6 +133,7 @@ class FalabellaScrapingSpider(Spider):
 		pag = 1
 
 		while True:
+			cache_url = driver.current_url
 			try:	
 				driver.execute_script('document.body.style.MozTransform = "scale(0.3)";')
 				driver.execute_script('document.body.style.MozTransformOrigin = "0 0";')
@@ -197,6 +216,17 @@ class FalabellaScrapingSpider(Spider):
 					except:
 						print('FALLO INTENTO DEL CLICK')
 						trys2 += 1
+
+				continue
+
+			except WebDriverException:
+				driver = webdriver.Firefox()
+				driver.maximize_window()
+				sleep(10)
+				driver.set_page_load_timeout(45)
+
+				driver.get(cache_url)
+				sleep(10)
 
 				continue
 
