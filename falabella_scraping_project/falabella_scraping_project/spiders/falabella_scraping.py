@@ -45,16 +45,16 @@ class FalabellaScrapingSpider(Spider):
 
 	def parse(self, response):
 
-		n_cat = 0 ########################################################################################## ojo !
+		n_cat = 60 ########################################################################################## ojo !
 		print('\n')
 		print(response.url)
 		print('\n')
 		driver.get(response.url)
-
+		
 		main_page_source = Selector(text= driver.page_source)
-
+		
 		gen_categories = main_page_source.xpath('.//*[@class= "ThirdLevelItems_submenuElementLiBold__1aiT_"]/@href').extract()
-
+		
 		gen_categories = unic_func(gen_categories)
 		gen_categories = list(dict.fromkeys(gen_categories))
 
@@ -72,46 +72,37 @@ class FalabellaScrapingSpider(Spider):
 			else:
 				#print(cate, '----->', cate.count('?isPLP=1'), '\n')
 				categories.append(cate)
+		print(categories)
 
 
 		#sleep(60)
 
-
+		
 		yield Request(url= response.url,
 					  callback= self.first_parse_cats,
 					  meta= {'n_cat': n_cat,
 							 'categories': categories})
-
-
-
-########################################################################################################################################################################################################################
+		
 
 
 
 	def first_parse_cats(self, response):
+		
 		categories = response.meta['categories']
 		n_cat = response.meta['n_cat']
-
+		
 		category = categories[n_cat]
-
+		
 		yield Request(url= 'https://www.falabella.com.co' + category,
-						  callback= self.main_parse_cats,
-						  meta= {'n_cat': n_cat,
-								 'categories': categories})
-
-
-
-
-
-
-########################################################################################################################################################################################################################
-
+					  callback= self.main_parse_cats,
+					  meta= {'n_cat': n_cat, 'categories': categories})
+		
 
 
 
 
 	def main_parse_cats(self, response):
-
+		
 		global driver
 		try:
 			categories = response.meta['categories']
@@ -134,13 +125,11 @@ class FalabellaScrapingSpider(Spider):
 			pag = 1
 
 			while True:
-				#try: 
 				cache_url = driver.current_url
-				#except: cache_url = None
 
 				print('\n', cache_url, '----------> Este es el cache url', '\n')
 
-				try:	
+				try:
 					driver.execute_script('document.body.style.MozTransform = "scale(0.3)";')
 					driver.execute_script('document.body.style.MozTransformOrigin = "0 0";')
 					driver.execute_script("window.scrollTo(0, window.scrollY - 10000)")
@@ -178,6 +167,9 @@ class FalabellaScrapingSpider(Spider):
 						if prod_name == None:
 							prod_name = prod.xpath('.//b[@class= "jsx-287641535 title2 primary  jsx-185326735 bold    pod-subTitle"]/text()').extract_first()
 
+						if prod_name == None:
+							prod_name = prod.xpath('.//b[@class= "jsx-3773340100 copy13 primary  jsx-185326735 normal    pod-subTitle"]/text()').extract_first()
+
 						print(prod_name, '---------> prod name')
 
 						normal_price= prod.xpath('.//ol/li//span/text()').extract()
@@ -203,7 +195,7 @@ class FalabellaScrapingSpider(Spider):
 
 					print('Antes del click')
 					driver.find_element_by_css_selector('#testId-pagination-top-arrow-right').click()
-					print('Despues del click')	
+					print('Despues del click')  
 					
 					pag += 1
 
@@ -224,10 +216,6 @@ class FalabellaScrapingSpider(Spider):
 							trys2 += 1
 
 					continue
-
-
-
-#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 
 		except WebDriverException:
@@ -246,13 +234,12 @@ class FalabellaScrapingSpider(Spider):
 			pag = 1
 
 			while True:
-				#try: 
 				cache_url = driver.current_url
-				#except: cache_url = None
+
 
 				print('\n', cache_url, '----------> Este es el cache url', '\n')
 
-				try:	
+				try:    
 					driver.execute_script('document.body.style.MozTransform = "scale(0.3)";')
 					driver.execute_script('document.body.style.MozTransformOrigin = "0 0";')
 					driver.execute_script("window.scrollTo(0, window.scrollY - 10000)")
@@ -315,7 +302,7 @@ class FalabellaScrapingSpider(Spider):
 
 					print('Antes del click')
 					driver.find_element_by_css_selector('#testId-pagination-top-arrow-right').click()
-					print('Despues del click')	
+					print('Despues del click')  
 					
 					pag += 1
 
@@ -336,11 +323,6 @@ class FalabellaScrapingSpider(Spider):
 							trys2 += 1
 
 					continue
-			
-
-#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
-
-
 
 
 		if n_cat < len(categories)-1:
@@ -350,7 +332,7 @@ class FalabellaScrapingSpider(Spider):
 						  callback= self.first_parse_cats,
 						  meta= {'n_cat': n_cat,
 								 'categories': categories},
-						  dont_filter= True)			
+						  dont_filter= True)            
 		else:
 			print('\n', '='*20,'\n', 'TAL PARECE QUE SE EXTRAJO TODA LA INFORMACION DE LA PAGINA !!','\n', '='*20, '\n')
 
