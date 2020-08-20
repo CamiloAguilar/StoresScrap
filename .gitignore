@@ -127,3 +127,5 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+scraping_stores/scraping_stores/spiders/resultados/exito_data_2.csv
+*.csv
