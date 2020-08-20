@@ -45,7 +45,7 @@ class FalabellaScrapingSpider(Spider):
 
 	def parse(self, response):
 
-		n_cat = 60 ########################################################################################## ojo !
+		n_cat = 0 ########################################################################################## ojo !
 		print('\n')
 		print(response.url)
 		print('\n')
@@ -72,7 +72,7 @@ class FalabellaScrapingSpider(Spider):
 			else:
 				#print(cate, '----->', cate.count('?isPLP=1'), '\n')
 				categories.append(cate)
-		print(categories)
+		#print(categories)
 
 
 		#sleep(60)
@@ -124,6 +124,9 @@ class FalabellaScrapingSpider(Spider):
 
 			pag = 1
 
+			n = 0
+			cache_list = ([], [])
+
 			while True:
 				cache_url = driver.current_url
 
@@ -170,6 +173,9 @@ class FalabellaScrapingSpider(Spider):
 						if prod_name == None:
 							prod_name = prod.xpath('.//b[@class= "jsx-3773340100 copy13 primary  jsx-185326735 normal    pod-subTitle"]/text()').extract_first()
 
+						if prod_name != None:
+							prod_name = prod_name.replace('\n', '')
+
 						print(prod_name, '---------> prod name')
 
 						normal_price= prod.xpath('.//ol/li//span/text()').extract()
@@ -186,12 +192,33 @@ class FalabellaScrapingSpider(Spider):
 							  '\n\tNormal price:\t', normal_price,
 							  '\n\tDiscount price:\t', disc_price)
 
+						cache_list[n].append(prod_name)
+
 
 						yield {'cat_name': cat_name,
 							   'prod_name': prod_name,
 							   'normal_price': normal_price,
 							   'disc_price': disc_price,
 							   'image_url': image_url}
+
+					n += 1
+					if cache_list[0] == cache_list[1]:
+						driver.refresh()
+
+					print(n, "---------------------------------- N")
+					print()
+					print(cache_list[0])
+					print()
+					print()
+					print(cache_list[1])
+					print()
+					print()
+
+
+					if n > 1:
+						n = 0
+						cache_list = ([], [])
+
 
 					print('Antes del click')
 					driver.find_element_by_css_selector('#testId-pagination-top-arrow-right').click()
@@ -219,7 +246,7 @@ class FalabellaScrapingSpider(Spider):
 
 
 		except WebDriverException:
-			print('Entra al except de la excepcion que es !! ---------------------------------')
+			print('Entra al except que es !! ---------------------------------')
 
 			driver = webdriver.Firefox()
 			driver.maximize_window()
@@ -276,6 +303,9 @@ class FalabellaScrapingSpider(Spider):
 
 						if prod_name == None:
 							prod_name = prod.xpath('.//b[@class= "jsx-287641535 title2 primary  jsx-185326735 bold    pod-subTitle"]/text()').extract_first()
+
+						if prod_name != None:
+							prod_name = prod_name.replace('\n', '')
 
 						print(prod_name, '---------> prod name')
 
