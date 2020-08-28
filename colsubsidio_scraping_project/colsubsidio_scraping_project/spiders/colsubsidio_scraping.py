@@ -6,11 +6,9 @@ from scrapy.selector import Selector
 from selenium import webdriver
 
 from time import sleep
+from datetime import date
 
 
-
-driver = webdriver.Firefox()
-sleep(5)
 
 
 def ext_func(prod_variable):
@@ -39,8 +37,24 @@ def next_button_func(button_list):
 
 class ColsubsidioScrapingSpider(Spider):
 	name = 'colsubsidio_scraping'
+
+
+	custom_settings = {
+						'FEED_FORMAT': "csv",
+						'FEED_URI': './resultados/supermercado_data/supermercado_data_date_' + str(date.today()) + '.csv',
+						'FEED_EXPORTERS': {
+								'csv': 'scrapy.exporters.CsvItemExporter'
+							},
+						'FEED_EXPORT_ENCODING': 'utf-8',
+ 						}
+
+
 	allowed_domains = ['supermercadoscolsubsidio.com']
 	start_urls = ['https://www.supermercadoscolsubsidio.com/']
+
+
+	driver = webdriver.Firefox()
+	sleep(5)
 
 
 	def parse(self, response):
@@ -59,27 +73,27 @@ class ColsubsidioScrapingSpider(Spider):
 
 		n_cat = 0 ############################################################# OJO !!
 
-		driver.get(response.url)
+		self.driver.get(response.url)
 		sleep(3)
-		driver.execute_script("window.scrollTo(0, window.scrollY + 10)")
+		self.driver.execute_script("window.scrollTo(0, window.scrollY + 10)")
 
 		print('Antes del click')
 		while True:
-			driver.find_element_by_css_selector('.vtex-flex-layout-0-x-flexColChild--search-out-categories-right-container > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > section:nth-child(1) > button:nth-child(2)').click()
+			self.driver.find_element_by_css_selector('.vtex-flex-layout-0-x-flexColChild--search-out-categories-right-container > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > section:nth-child(1) > button:nth-child(2)').click()
 			
-			main_page_sel = Selector(text= driver.page_source)
+			main_page_sel = Selector(text= self.driver.page_source)
 			categories = main_page_sel.xpath('//*[@class= "vtex-store-components-3-x-imageElementLink"]/@href').extract()
 			if len(categories) > 7:
 				break 
 
-		main_page_sel = Selector(text= driver.page_source)
+		main_page_sel = Selector(text= self.driver.page_source)
 		categories = main_page_sel.xpath('//*[@class= "vtex-store-components-3-x-imageElementLink"]/@href').extract()
 		otro_url = main_page_sel.xpath('//*[@class= "vtex-slider-layout-0-x-imageElementLink vtex-slider-layout-0-x-imageElementLink--main-carousel vtex-store-components-3-x-imageElementLink vtex-store-components-3-x-imageElementLink--main-carousel"]/@href').extract()
 		categories = list(dict.fromkeys(categories + otro_url)) ################# OJO !!
 
 		#categories = otro_url
 
-		# driver.quit() ##################################### OJO !!
+		# self.driver.quit() ##################################### OJO !!
 
 		yield Request(url = response.url,
 					  callback= self.parse_ini,
@@ -93,6 +107,8 @@ class ColsubsidioScrapingSpider(Spider):
 		categories = response.meta['categories']
 		pag = 1
 
+		trys = 1
+
 		category = categories[n_cat]
 
 		exten = ext_func(category)
@@ -103,7 +119,8 @@ class ColsubsidioScrapingSpider(Spider):
 							  'categories':categories,
 							  'category': category,
 							  'pag': pag,
-							  'exten': exten})
+							  'exten': exten,
+							  'trys': trys})
 
 
 	def main_mercado(self, response):
@@ -111,28 +128,34 @@ class ColsubsidioScrapingSpider(Spider):
 		print('*'*15, 'estamos en la pag', '*'*15)
 		print(response.url)
 		print()
+		print(response.status)
+		print()
+
 
 		n_cat = response.meta['n_cat']
 		categories = response.meta['categories']
 		pag = response.meta['pag']
 		category = response.meta['category']
 		exten = response.meta['exten']
+		trys = response.meta['trys']
 
 		prods = response.xpath('//*[@class= "vtex-search-result-3-x-gallery flex flex-row flex-wrap items-stretch bn ph1 na4 pl9-l"]/div')
+
+
 
 		cat_name= response.xpath('//*[@class= "vtex-search-result-3-x-galleryTitle--layout t-heading-1"]/text()').extract_first()
 
 		button_next = response.xpath('//*[@class= "vtex-button__label flex items-center justify-center h-100 ph5 "]/text()').extract()
 
 		if '.com/26' in response.url:
-			driver.get(response.url)
+			self.driver.get(response.url)
 			sleep(3)
-			driver.execute_script('document.body.style.MozTransform = "scale(0.3)";')
-			driver.execute_script('document.body.style.MozTransformOrigin = "0 0";')
-			driver.execute_script("window.scrollTo(0, window.scrollY + 3)")
+			self.driver.execute_script('document.body.style.MozTransform = "scale(0.3)";')
+			self.driver.execute_script('document.body.style.MozTransformOrigin = "0 0";')
+			self.driver.execute_script("window.scrollTo(0, window.scrollY + 3)")
 			sleep(5)
 
-			cat_page_sel = Selector(text= driver.page_source)
+			cat_page_sel = Selector(text= self.driver.page_source)
 
 			prods = cat_page_sel.xpath('//*[@class= "vtex-search-result-3-x-gallery flex flex-row flex-wrap items-stretch bn ph1 na4 pl9-l"]/div')
 			cat_name= cat_page_sel.xpath('//*[@class= "vtex-search-result-3-x-galleryTitle--layout t-heading-1"]/text()').extract_first()
@@ -174,16 +197,31 @@ class ColsubsidioScrapingSpider(Spider):
 		
 		test = next_button_func(button_next)
 
-		if test > 0:
-			pag += 1
 
+		if prods == [] and trys <= 10:
+			trys += 1
+
+			yield Request(url= response.url,
+						  callback= self.main_mercado,
+						  meta = {'n_cat': n_cat,
+								  'categories':categories,
+								  'category': category,
+								  'pag': pag,
+								  'exten': exten,
+							  	  'trys': trys},
+						  dont_filter= True)
+
+		elif test > 0:
+			pag += 1
+			trys = 1
 			yield Request(url= 'https://www.supermercadoscolsubsidio.com' + category + exten + 'page='+ str(pag),
 						  callback= self.main_mercado,
 						  meta = {'n_cat': n_cat,
 								  'categories':categories,
 								  'category': category,
 								  'pag': pag,
-								  'exten': exten})
+								  'exten': exten,
+							  	  'trys': trys})
 
 
 
@@ -199,7 +237,7 @@ class ColsubsidioScrapingSpider(Spider):
 						  dont_filter= True)
 
 		else:
-			driver.quit()
+			self.driver.quit()
 			print('SE HA TERMINADO DE EXTRAER INFO DE LA PAGINA !!')
 
 

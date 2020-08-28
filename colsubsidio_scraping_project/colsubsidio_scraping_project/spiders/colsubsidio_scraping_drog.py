@@ -3,8 +3,10 @@ from scrapy.http import Request
 
 from json import loads
 
-try: driver.quit()
-except: pass
+from datetime import date
+
+# try: driver.quit()
+# except: pass
 
 
 
@@ -19,6 +21,17 @@ def num_cat_func(num):
 
 class ColsubsidioScrapingDrogSpider(Spider):
 	name = 'colsubsidio_scraping_drog'
+
+	custom_settings = {
+						'FEED_FORMAT': "csv",
+						'FEED_URI': './resultados/drogueria_data/drogueria_data_date_' + str(date.today()) + '.csv',
+						'FEED_EXPORTERS': {
+								'csv': 'scrapy.exporters.CsvItemExporter'
+							},
+						'FEED_EXPORT_ENCODING': 'utf-8',
+ 						}
+
+
 	allowed_domains = ['drogueriascolsubsidio.com']
 	start_urls = ['http://drogueriascolsubsidio.com/']
 
@@ -179,8 +192,10 @@ class ColsubsidioScrapingDrogSpider(Spider):
 				disc_price = prod['items'][0]['sellers'][0]['commertialOffer']['Price']
 				image_url = prod['items'][0]['images'][0]['imageUrl']
 
-				unidades = prod['Unidades'][0]
-				
+				try: unidades = prod['Unidades'][0]
+				except: unidades = None
+
+
 				print(n_from, n_to, '-----------------------> n from n to')
 				print('\nCategoria:\t', cat_name,
 					  '\n\tProducto:\t', prod_name,
