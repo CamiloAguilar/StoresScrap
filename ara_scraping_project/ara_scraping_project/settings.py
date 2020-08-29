@@ -1,4 +1,4 @@
-# Scrapy settings for colsubsidio_scraping_project project
+# Scrapy settings for ara_scraping_project project
 #
 # For simplicity, this file contains only settings considered important or
 # commonly used. You can find more settings consulting the documentation:
@@ -7,25 +7,29 @@
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
-BOT_NAME = 'colsubsidio_scraping_project'
+BOT_NAME = 'ara_scraping_project'
 
-SPIDER_MODULES = ['colsubsidio_scraping_project.spiders']
-NEWSPIDER_MODULE = 'colsubsidio_scraping_project.spiders'
+SPIDER_MODULES = ['ara_scraping_project.spiders']
+NEWSPIDER_MODULE = 'ara_scraping_project.spiders'
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-#USER_AGENT = 'colsubsidio_scraping_project (+http://www.yourdomain.com)'
+#USER_AGENT = 'ara_scraping_project (+http://www.yourdomain.com)'
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
 
+
+FEED_EXPORTERS = {
+    'csv': 'ara_scraping_project.exporters.CsvCustomSeperator'
+}
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32
 
 # Configure a delay for requests for the same website (default: 0)
 # See https://docs.scrapy.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
-#DOWNLOAD_DELAY = 2
+#DOWNLOAD_DELAY = 3
 # The download delay setting will honor only one of:
 #CONCURRENT_REQUESTS_PER_DOMAIN = 16
 #CONCURRENT_REQUESTS_PER_IP = 16
@@ -45,13 +49,13 @@ ROBOTSTXT_OBEY = False
 # Enable or disable spider middlewares
 # See https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 #SPIDER_MIDDLEWARES = {
-#    'colsubsidio_scraping_project.middlewares.ColsubsidioScrapingProjectSpiderMiddleware': 543,
+#    'ara_scraping_project.middlewares.AraScrapingProjectSpiderMiddleware': 543,
 #}
 
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #DOWNLOADER_MIDDLEWARES = {
-#    'colsubsidio_scraping_project.middlewares.ColsubsidioScrapingProjectDownloaderMiddleware': 543,
+#    'ara_scraping_project.middlewares.AraScrapingProjectDownloaderMiddleware': 543,
 #}
 
 # Enable or disable extensions
@@ -63,7 +67,7 @@ ROBOTSTXT_OBEY = False
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 #ITEM_PIPELINES = {
-#    'colsubsidio_scraping_project.pipelines.ColsubsidioScrapingProjectPipeline': 300,
+#    'ara_scraping_project.pipelines.AraScrapingProjectPipeline': 300,
 #}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
@@ -86,25 +90,3 @@ ROBOTSTXT_OBEY = False
 #HTTPCACHE_DIR = 'httpcache'
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
-
-
-
-#FEED_URI= 'C:/Users/DEISY VALENZUELA/Desktop/Desarrollos EasyData/trabajo/colsubsidio_scraping_project/colsubsidio_scraping_project/spiders/document.csv'
-
-# FEED_EXPORTERS= {
-# 		'csv': 'scrapy.exporters.CsvItemExporter',
-# }
-
-# FEED = {
-# 	    'items.csv': {
-#         'format': 'csv',
-#         'encoding': 'utf8',
-#     }
-# } 
-
-from datetime import date
-
-FEED_URI = 'spider1_' + str(date.today()) + '.csv'
-FEED_FORMAT = 'csv'
-FEED_EXPORTERS = {'csv': 'scrapy.exporters.CsvItemExporter'}
-FEED_EXPORT_ENCODING = 'utf-8'

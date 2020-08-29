@@ -95,7 +95,8 @@ class FalabellaScrapingSpider(Spider):
 		
 		yield Request(url= 'https://www.falabella.com.co' + category,
 					  callback= self.main_parse_cats,
-					  meta= {'n_cat': n_cat, 'categories': categories})
+					  meta= {'n_cat': n_cat, 'categories': categories},
+					  dont_filter= True)
 		
 
 
@@ -201,30 +202,23 @@ class FalabellaScrapingSpider(Spider):
 							   'disc_price': disc_price,
 							   'image_url': image_url}
 
-					n += 1
-					if cache_list[0] == cache_list[1]:
-						driver.refresh()
-
-					print(n, "---------------------------------- N")
-					print()
-					print(cache_list[0])
-					print()
-					print()
-					print(cache_list[1])
-					print()
-					print()
-
-
-					if n > 1:
-						n = 0
-						cache_list = ([], [])
-
+					
 
 					print('Antes del click')
 					driver.find_element_by_css_selector('#testId-pagination-top-arrow-right').click()
 					print('Despues del click')  
 					
 					pag += 1
+
+					n += 1
+					if cache_list[0] == cache_list[1]:
+						driver.refresh()
+
+					if n > 1:
+						n = 0
+						cache_list = ([], [])
+
+						
 
 				except NoSuchElementException:
 					break
