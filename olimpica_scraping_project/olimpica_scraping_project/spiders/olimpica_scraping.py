@@ -24,7 +24,7 @@ class OlimpicaScrapingSpider(Spider):
 		try: n_cat = response.meta['n_cat']
 		except: n_cat = 0
 
-		categories = response.xpath('//*[@class= "navigation-primary hidden-xs hidden-sm"]/ul/li/a/@href').extract()[:-2]
+		categories = response.xpath('//*[@class= "menu"]/li[@class= "item-submenu"]/a/@href').extract()
 
 		category = categories[n_cat]
 
@@ -105,3 +105,8 @@ class OlimpicaScrapingSpider(Spider):
 						  callback= self.parse,
 						  meta= {'n_cat': n_cat},
 						  dont_filter= True)
+
+		else:
+			driver.quit()
+
+

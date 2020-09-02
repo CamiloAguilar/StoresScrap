@@ -210,6 +210,8 @@ class FalabellaScrapingSpider(Spider):
 					
 					pag += 1
 
+
+
 					n += 1
 					if cache_list[0] == cache_list[1]:
 						driver.refresh()
@@ -218,7 +220,7 @@ class FalabellaScrapingSpider(Spider):
 						n = 0
 						cache_list = ([], [])
 
-						
+					print(cache_list, n)						
 
 				except NoSuchElementException:
 					break
@@ -253,6 +255,9 @@ class FalabellaScrapingSpider(Spider):
 
 
 			pag = 1
+
+			n = 0
+			cache_list = ([], [])
 
 			while True:
 				cache_url = driver.current_url
@@ -329,6 +334,17 @@ class FalabellaScrapingSpider(Spider):
 					print('Despues del click')  
 					
 					pag += 1
+
+					n += 1
+					if cache_list[0] == cache_list[1]:
+						driver.refresh()
+
+					if n > 1:
+						n = 0
+						cache_list = ([], [])
+
+					print(cache_list, n)						
+
 
 				except NoSuchElementException:
 					break
