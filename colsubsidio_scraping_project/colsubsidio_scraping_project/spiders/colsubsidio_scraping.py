@@ -53,11 +53,14 @@ class ColsubsidioScrapingSpider(Spider):
 	start_urls = ['https://www.supermercadoscolsubsidio.com/']
 
 
-	driver = webdriver.Firefox()
-	sleep(5)
+	
 
 
 	def parse(self, response):
+
+		self.driver = webdriver.Firefox()
+		sleep(5)
+
 		print()
 		print(response.url)
 		print()

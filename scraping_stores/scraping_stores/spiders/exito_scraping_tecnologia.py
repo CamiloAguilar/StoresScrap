@@ -27,17 +27,11 @@ def ext_func(prod_variable):
 		return '?'
 
 
-# self.driver = webdriver.Firefox()
-# self.driver.maximize_window()
-# sleep(10)
-# self.driver.set_page_load_timeout(45)
 
-
-class ExitoScrapingSpider(Spider):
-	name = 'exito_scraping'
+class ExitoScrapingTecnologiaSpider(Spider):
+	name = 'exito_scraping_tecnologia'
 	allowed_domains = ['exito.com']
 	start_urls = ['http://www.exito.com/category']
-
 
 	def start_request(self):
 		for url in start_urls:
@@ -66,7 +60,7 @@ class ExitoScrapingSpider(Spider):
 
 		categories = response.xpath('//*[@class = "fl w-30"]//a/@href').extract()
 
-		categories = [url for url in categories if 'mercado' in url]
+		categories = [url for url in categories if 'tecnologia' in url]
 
 		print(categories)
 
@@ -78,8 +72,8 @@ class ExitoScrapingSpider(Spider):
 		yield Request(url = 'https://www.exito.com' + category,
 					  callback = self.prod_parse,
 					  meta = {'category': category,
-					  		  'n_cat': n_cat,
-					  		  'categories': categories})
+							  'n_cat': n_cat,
+							  'categories': categories})
 
 
 	def prod_parse(self, response):

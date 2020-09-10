@@ -8,11 +8,11 @@ from selenium.common.exceptions import ElementClickInterceptedException
 from time import sleep
 
 
-# options = webdriver.FirefoxOptions()
+# options = webself.driver.FirefoxOptions()
 # options.add_argument('--headless')
-# driver = webdriver.Firefox(options = options)
+# self.driver = webself.driver.Firefox(options = options)
 
-driver = webdriver.Firefox()
+
 
 
 class AlkostoScrapingSpider(Spider):
@@ -21,10 +21,21 @@ class AlkostoScrapingSpider(Spider):
 	start_urls = ['http://alkosto.com/']
 
 
+	# def start_request(self):
+		
+	# 	for n in start_urls:
+	# 		yield Request(url= n,
+	# 					  callback= self.parse)
+
 	def parse(self, response):
 
+
+
 		try: n_cat = response.meta['n_cat']
-		except: n_cat = 0
+		except: n_cat = 0 ###################################################################################### ojo
+
+		if n_cat == 0:
+			self.driver = webdriver.Firefox()
 
 		print('\n','#'*20, 'Este es n_cat !!', '\n', n_cat)
 
@@ -195,13 +206,13 @@ class AlkostoScrapingSpider(Spider):
 		while trys <= 5:
 			try:
 				print('\n','*'*10, 'INTENTO # ', trys,'*'*10, '\n')
-				driver.get(response.url)
+				self.driver.get(response.url)
 				if trys <= 3:
 					sleep(3)
 				else:
 					sleep(5)
 
-				buttons = driver.find_elements_by_xpath('/html/body/div[1]/div/div[2]/div/div/div[2]/div')
+				buttons = self.driver.find_elements_by_css_selector('html body div#app div.Quicksilver__SurferBoard-sc-1n5zca7-0.jIISCM div.Container__ContainerTemplate-yuoyfe-0.eqBJUR div.Container__ItemTemplate-yuoyfe-1.hopuig div.SubContentStyled-sc-1gjz1on-0.kEzHZm div.ProductsByCategory__DisplayByProductStyled-art75o-1.bWikfl div.ProductsByCategory__Header-art75o-0.RKWEe button.ant-btn.ant-btn-link')
 
 				buttons[mercado_n_cat].click()
 				break
@@ -212,8 +223,8 @@ class AlkostoScrapingSpider(Spider):
 		pag = 1
 		while True:
 			print('\n', '#'*15, 'Estamos en la pagina ', pag,'#'*15, '\n')
-			mercado_pag_sel = Selector(text= driver.page_source)
-			mercado_products = mercado_pag_sel.xpath('.//*[@class= "ProductDisplay-sc-5nadct-0 ldPWHL"]/div')
+			mercado_pag_sel = Selector(text= self.driver.page_source)
+			mercado_products = mercado_pag_sel.xpath('.//*[@class= "ProductDisplay__StyledContainer-sc-5nadct-0 dNEKlU"]/div')
 
 			cat_name = mercado_pag_sel.xpath('//h1/text()').extract_first()
 			print('\n', '#'*15, 'De la categoria ', cat_name,'#'*15, '\n')
@@ -255,7 +266,7 @@ class AlkostoScrapingSpider(Spider):
 						   'image_url': image_url}
 
 				
-				next_button= driver.find_elements_by_xpath('/html/body/div[1]/div/div[2]/div/div/div[2]/ul/li')
+				next_button= self.driver.find_elements_by_xpath('/html/body/div[1]/div/div[2]/div/div/div[2]/ul/li')
 				button_test = mercado_pag_sel.xpath('/html/body/div[1]/div/div[2]/div/div/div[2]/ul/li')
 
 				if button_test == []:
@@ -267,7 +278,7 @@ class AlkostoScrapingSpider(Spider):
 				button_test = button_test.xpath('.//button[@class= "ant-pagination-item-link"]/@disabled')
 				
 				if next_button != [] and button_test == []:
-					#next_button= driver.find_elements_by_xpath('/html/body/div[1]/div/div[2]/div/div/div[2]/ul/li/a')[-1].click()
+					#next_button= self.driver.find_elements_by_xpath('/html/body/div[1]/div/div[2]/div/div/div[2]/ul/li/a')[-1].click()
 					next_button[-1].click()
 					sleep(3)
 				else:
@@ -289,9 +300,9 @@ class AlkostoScrapingSpider(Spider):
 				
 				else:
 					print('\n', '='*20,'\n', 'TAL PARECE QUE SE EXTRAJO TODA LA INFORMACION DE LA PAGINA !!','\n', '='*20, '\n')
-					driver.quit()
+					self.driver.quit()
 					break
 
 
-try: driver.quit()
-except: pass
+# try: self.driver.quit()
+# except: pass

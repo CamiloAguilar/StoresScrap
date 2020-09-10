@@ -5,6 +5,7 @@ import os, logging
 
 from datetime import date
 
+from time import sleep
 
 try:
 	#os.mkdir(os.getcwd() + '\\logs')
@@ -47,7 +48,7 @@ class KtronixScrapingSpider(Spider):
 		print_('#'*20+'INICIAMOS A TRABAJAR'+'#'*20, 'deb')		
 
 		try: n_cat = response.meta['n_cat']
-		except: n_cat = 2 
+		except: n_cat = 0  ################################################################# OJO !!
 
 		#print('\n','#'*20, 'Este es n_cat !!', '\n', n_cat)
 		print_()
@@ -95,7 +96,7 @@ class KtronixScrapingSpider(Spider):
 		test = []
 
 		try: n_subcat = response.meta['n_subcat']
-		except: n_subcat = 0
+		except: n_subcat = 0 ##################################################################################### OJO !!
 
 		pag = 1
 
@@ -105,13 +106,18 @@ class KtronixScrapingSpider(Spider):
 		print_(response.status)
 		print_()
 
-		sub_categories = response.xpath('//*[@class= "col-4 col-xs-12"]/a/@href').extract()
-
+		sub_categories = response.xpath('//*[@class= "col-4 col-xs-12"]//a/@href').extract()
+		sub_categories = list(dict.fromkeys(sub_categories))
+		print(sub_categories, '--------------------------------------------------> sub_categories')
+		sleep(20)
 		sub_category = sub_categories[n_subcat].replace('../..', '')
 
 		print()
 		print(sub_category)
 		print()
+
+		if sub_category[0] != '/':
+			sub_category = '/' + sub_category
 
 
 		size = 25
@@ -131,6 +137,10 @@ class KtronixScrapingSpider(Spider):
 
 
 	def main_parse(self, response):
+		print_()
+		print_(response.url)
+		print_()
+
 		n_cat = response.meta['n_cat']
 		categories = response.meta['categories']
 		category = response.meta['category']
@@ -145,12 +155,19 @@ class KtronixScrapingSpider(Spider):
 
 		prods = response.xpath('//*[@class= "product__listing product__list"]/li')
 		cat_name = response.xpath('//*[@class= "col-xs-12 component__title"]/h1/text()').extract_first()
-		if cat_name != []:
-			cat_name = response.xpath('//*[@class= "col-xs-12 component__title"]/h1/text()').extract_first().strip()
-		else: 
+		try:
+			if cat_name != []:
+				cat_name = response.xpath('//*[@class= "col-xs-12 component__title"]/h1/text()').extract_first().strip()
+			else: 
+				cat_name = None
+		except:
 			cat_name = None
 
 		for prod in prods:
+			print()
+			print(response.url)
+			print()
+
 			id_prod = prod.xpath('.//*[@class= "product__information"]/*[@class= "product__information--name"]/a/@data-id').extract_first()
 			prod_name = prod.xpath('.//*[@class= "product__information"]/*[@class= "product__information--name"]/a/text()').extract_first()
 
@@ -208,14 +225,22 @@ class KtronixScrapingSpider(Spider):
 				}
 
 		if test != test_2:
-
+			print_('ENTRA AL IF PARA PASAR DE PAG')
 			if pag == 1 and size == 25:
 				size = 100
 			else:
 				pag += 1
 
+			if '?' in sub_category:
+				exten = '&'
+			else:
+				exten = '?'
 
-			yield Request(url= 'https://www.ktronix.com' + sub_category + '?page='+str(pag)+'&pageSize='+str(size)+'&sort=relevance',
+			abs_link = 'https://www.ktronix.com' + sub_category +exten+'page='+str(pag)+'&pageSize='+str(size)+'&sort=relevance'
+			abs_link = abs_link.replace('#', '')
+			print_(abs_link)
+
+			yield Request(url= abs_link,
 						  callback= self.main_parse,
 						  meta= {'n_cat': n_cat,
 								 'categories': categories,
