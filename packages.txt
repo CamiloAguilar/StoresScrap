@@ -1,0 +1,11 @@
+import scrapy
+scrapy.__version__ : 2.2.1
+
+import selenium
+selenium.__version__ : 3.141.0
+
+import json
+json.__version__ : 2.0.9
+
+
+
