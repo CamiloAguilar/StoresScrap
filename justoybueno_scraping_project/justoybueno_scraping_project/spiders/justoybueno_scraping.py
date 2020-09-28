@@ -5,7 +5,27 @@ from json import loads
 
 from pandas import read_csv
 
+from time import sleep
+from socket import gethostbyname, create_connection, error
 
+
+
+def check_connection():
+	while True:
+		try:
+			gethostbyname('google.com')
+			connection = create_connection(('google.com', 80), 1)
+			connection.close()
+			print('Hay conexion a internet, continuamos !!')
+			break
+		
+		except error:
+			print('No hay conexion a internet, esperaremos por 2 minutos')
+			sleep(120)
+			continue
+
+
+check_connection()
 
 class JustoybuenoScrapingSpider(Spider):
 	name = 'justoybueno_scraping'
@@ -20,6 +40,8 @@ class JustoybuenoScrapingSpider(Spider):
 		cod_dane = read_csv('codigos_dane.csv', dtype= {'cod_municipio': str})
 		#print(cod_dane)
 		for cod in cod_dane['cod_municipio']:
+			
+			check_connection()
 			yield Request(url= 'https://monedero.justoybueno.com/servicios/api/public/Producto/GetProductosMarcados?codCiudad=' + cod,
 						  callback= self.mun_prod_parse,
 						  meta= {'cod': cod})

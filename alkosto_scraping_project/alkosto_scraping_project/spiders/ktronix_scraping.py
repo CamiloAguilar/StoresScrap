@@ -6,6 +6,24 @@ import os, logging
 from datetime import date
 
 from time import sleep
+from socket import gethostbyname, create_connection, error
+
+
+def check_connection():
+	while True:
+		try:
+			gethostbyname('google.com')
+			connection = create_connection(('google.com', 80), 1)
+			connection.close()
+			print('Hay conexion a internet, continuamos !!')
+			break
+		
+		except error:
+			print('No hay conexion a internet, esperaremos por 2 minutos')
+			sleep(120)
+			continue
+
+
 
 try:
 	#os.mkdir(os.getcwd() + '\\logs')
@@ -37,6 +55,8 @@ def print_(message = ' ', type_ = 'info'):
 
 
 
+check_connection()
+
 class KtronixScrapingSpider(Spider):
 	name = 'ktronix_scraping'
 	allowed_domains = ['ktronix.com']
@@ -64,7 +84,7 @@ class KtronixScrapingSpider(Spider):
 		category = categories[n_cat] 
 
 
-
+		check_connection()
 		yield Request(url= category,
 					  callback= self.category_parse,
 					  meta= {'n_cat': n_cat,
@@ -79,6 +99,7 @@ class KtronixScrapingSpider(Spider):
 		
 		category = categories[n_cat]
 
+		check_connection()
 		yield Request(url= category,
 					  callback= self.category_parse,
 					  meta= {'n_cat': n_cat,
@@ -121,6 +142,8 @@ class KtronixScrapingSpider(Spider):
 
 
 		size = 25
+		
+		check_connection()
 		yield Request(url = 'https://www.ktronix.com' + sub_category,
 					  callback= self.main_parse,
 					  meta= {'n_cat': n_cat,
@@ -240,6 +263,7 @@ class KtronixScrapingSpider(Spider):
 			abs_link = abs_link.replace('#', '')
 			print_(abs_link)
 
+			check_connection()
 			yield Request(url= abs_link,
 						  callback= self.main_parse,
 						  meta= {'n_cat': n_cat,
@@ -255,6 +279,8 @@ class KtronixScrapingSpider(Spider):
 
 		elif test == test_2 and n_subcat < len(sub_categories)-1:
 			n_subcat += 1
+
+			check_connection()
 			yield Request(url= category,
 						  callback= self.category_parse,
 						  meta= {'n_cat': n_cat,
@@ -265,6 +291,8 @@ class KtronixScrapingSpider(Spider):
 
 		elif n_cat < len(categories) - 2:
 			n_cat += 1
+
+			check_connection()
 			yield Request(url= 'https://www.ktronix.com/',
 						  callback= self.partial_parse,
 						  meta= {'n_cat': n_cat,

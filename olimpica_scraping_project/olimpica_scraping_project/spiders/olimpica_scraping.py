@@ -5,6 +5,25 @@ from scrapy.selector import Selector
 from selenium import webdriver
 
 from time import sleep
+from socket import gethostbyname, create_connection, error
+
+
+
+def check_connection():
+	while True:
+		try:
+			gethostbyname('google.com')
+			connection = create_connection(('google.com', 80), 1)
+			connection.close()
+			print('Hay conexion a internet, continuamos !!')
+			break
+		
+		except error:
+			print('No hay conexion a internet, esperaremos por 2 minutos')
+			sleep(120)
+			continue
+
+
 
 
 # options = webdriver.FirefoxOptions()
@@ -13,6 +32,8 @@ from time import sleep
 
 driver = webdriver.Firefox()
 #driver.execute_script("document.body.style.transform = 'scale(1)'")
+
+check_connection()
 
 class OlimpicaScrapingSpider(Spider):
 	name = 'olimpica_scraping'
@@ -28,6 +49,7 @@ class OlimpicaScrapingSpider(Spider):
 
 		category = categories[n_cat]
 
+		check_connection()
 		yield Request(url= 'http://olimpica.com' + category,
 					 callback= self.category_parse,
 					 meta= {'n_cat': n_cat,
@@ -39,6 +61,7 @@ class OlimpicaScrapingSpider(Spider):
 
 		print('\n', response.url, '\n')
 
+		check_connection()
 		driver.get(response.url)
 		sleep(3)
 
@@ -101,6 +124,8 @@ class OlimpicaScrapingSpider(Spider):
 
 		if n_cat < len(categories)-1:
 			n_cat +=1
+
+			check_connection()
 			yield Request(url= 'http://olimpica.com/',
 						  callback= self.parse,
 						  meta= {'n_cat': n_cat},

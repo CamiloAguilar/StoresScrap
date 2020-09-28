@@ -8,7 +8,26 @@ from selenium import webdriver
 from time import sleep
 from datetime import date
 
+from socket import gethostbyname, create_connection, error
 
+
+
+def check_connection():
+	while True:
+		try:
+			gethostbyname('google.com')
+			connection = create_connection(('google.com', 80), 1)
+			connection.close()
+			print('Hay conexion a internet, continuamos !!')
+			break
+		
+		except error:
+			print('No hay conexion a internet, esperaremos por 2 minutos')
+			sleep(120)
+			continue
+
+
+check_connection()
 
 
 def ext_func(prod_variable):
@@ -65,6 +84,7 @@ class ColsubsidioScrapingSpider(Spider):
 		print(response.url)
 		print()
 
+		check_connection()
 		yield Request(url= response.url,
 					  callback= self.supermercado_parse)
 
@@ -76,6 +96,7 @@ class ColsubsidioScrapingSpider(Spider):
 
 		n_cat = 0 ############################################################# OJO !!
 
+		check_connection()
 		self.driver.get(response.url)
 		sleep(3)
 		self.driver.execute_script("window.scrollTo(0, window.scrollY + 10)")
@@ -98,6 +119,7 @@ class ColsubsidioScrapingSpider(Spider):
 
 		# self.driver.quit() ##################################### OJO !!
 
+		check_connection()
 		yield Request(url = response.url,
 					  callback= self.parse_ini,
 					  meta= {'n_cat': n_cat,
@@ -116,6 +138,7 @@ class ColsubsidioScrapingSpider(Spider):
 
 		exten = ext_func(category)
 
+		check_connection()
 		yield Request(url= 'https://www.supermercadoscolsubsidio.com' + category + exten + 'page='+ str(pag),
 					  callback= self.main_mercado,
 					  meta = {'n_cat': n_cat,
@@ -151,6 +174,7 @@ class ColsubsidioScrapingSpider(Spider):
 		button_next = response.xpath('//*[@class= "vtex-button__label flex items-center justify-center h-100 ph5 "]/text()').extract()
 
 		if '.com/26' in response.url:
+			check_connection()
 			self.driver.get(response.url)
 			sleep(3)
 			self.driver.execute_script('document.body.style.MozTransform = "scale(0.3)";')
@@ -204,6 +228,8 @@ class ColsubsidioScrapingSpider(Spider):
 		if prods == [] and trys <= 10:
 			trys += 1
 
+
+			check_connection()
 			yield Request(url= response.url,
 						  callback= self.main_mercado,
 						  meta = {'n_cat': n_cat,
@@ -217,6 +243,8 @@ class ColsubsidioScrapingSpider(Spider):
 		elif test > 0:
 			pag += 1
 			trys = 1
+
+			check_connection()
 			yield Request(url= 'https://www.supermercadoscolsubsidio.com' + category + exten + 'page='+ str(pag),
 						  callback= self.main_mercado,
 						  meta = {'n_cat': n_cat,
@@ -233,6 +261,7 @@ class ColsubsidioScrapingSpider(Spider):
 			sleep(15)
 			n_cat += 1
 
+			check_connection()
 			yield Request(url = response.url,
 						  callback= self.parse_ini,
 						  meta= {'n_cat': n_cat,

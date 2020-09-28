@@ -5,9 +5,24 @@ from json import loads
 
 from datetime import date
 
-# try: driver.quit()
-# except: pass
+from time import sleep
+from socket import gethostbyname, create_connection, error
 
+
+
+def check_connection():
+	while True:
+		try:
+			gethostbyname('google.com')
+			connection = create_connection(('google.com', 80), 1)
+			connection.close()
+			print('Hay conexion a internet, continuamos !!')
+			break
+		
+		except error:
+			print('No hay conexion a internet, esperaremos por 2 minutos')
+			sleep(120)
+			continue
 
 
 def num_cat_func(num):
@@ -18,6 +33,7 @@ def num_cat_func(num):
 
 
 
+check_connection()
 
 class ColsubsidioScrapingDrogSpider(Spider):
 	name = 'colsubsidio_scraping_drog'
@@ -41,6 +57,7 @@ class ColsubsidioScrapingDrogSpider(Spider):
 		print(response.url)
 		print()
 
+		check_connection()
 		yield Request(url= response.url,
 					  callback= self.drogueria_parse)
 
@@ -55,6 +72,7 @@ class ColsubsidioScrapingDrogSpider(Spider):
 		n_min_subcat = 0
 		gen_categories = response.xpath('//*[@class= "MenuContainer"]/ul/a/@href').extract()
 
+		check_connection()
 		yield Request(url= response.url, 
 					  callback= self.parse_secd,
 					  meta= {'n_cat': n_cat,
@@ -73,6 +91,7 @@ class ColsubsidioScrapingDrogSpider(Spider):
 
 		gen_category = gen_categories[n_cat]
 		
+		check_connection()
 		yield Request(url= 'https://www.drogueriascolsubsidio.com' + gen_category,
 					  callback= self.submain_drogueria,
 					  meta= {'n_cat': n_cat,
@@ -109,6 +128,7 @@ class ColsubsidioScrapingDrogSpider(Spider):
 		cat_code = n_cat + 1
 		n_subcat = num_cat_func(n_subcat)
 
+		check_connection()
 		yield Request(url= 'https://www.drogueriascolsubsidio.com/api/catalog_system/pub/products/search?fq=C:'+str(cat_code)+'/'+str(cat_code)+n_subcat+'&_from='+str(n_from)+'&_to='+str(n_to)+'&sm=0&O=OrderByReleaseDateDESC',
 					  callback= self.main_drogueria,
 					  meta= {'n_cat': n_cat,
@@ -137,6 +157,7 @@ class ColsubsidioScrapingDrogSpider(Spider):
 		gen_category = response.meta['gen_category']
 		lengs = response.meta['lengs']
 
+		check_connection()
 		yield Request(url= 'https://www.drogueriascolsubsidio.com/api/catalog_system/pub/products/search?fq=C:'+str(cat_code)+'/'+str(cat_code)+n_subcat+'&_from='+str(n_from)+'&_to='+str(n_to)+'&sm=0&O=OrderByReleaseDateDESC',
 						  callback= self.main_drogueria,
 						  meta= {'n_cat': n_cat,
@@ -216,6 +237,8 @@ class ColsubsidioScrapingDrogSpider(Spider):
 
 			n_from += 40
 			n_to += 40
+
+			check_connection()
 			yield Request(url= 'https://www.drogueriascolsubsidio.com/',
 						  callback= self.intermedio_parse,
 						  meta= {'n_cat': n_cat,
@@ -233,6 +256,7 @@ class ColsubsidioScrapingDrogSpider(Spider):
 		elif int(n_subcat) <= sub_categs_len:
 			n_subcat = int(n_subcat) + 1
 
+			check_connection()
 			yield Request(url= 'https://www.drogueriascolsubsidio.com' + gen_category,
 						  callback= self.submain_drogueria,
 						  meta= {'n_cat': n_cat,
@@ -247,6 +271,7 @@ class ColsubsidioScrapingDrogSpider(Spider):
 			n_min_subcat += lengs
 			n_cat += 1
 
+			check_connection()
 			yield Request(url= 'https://www.drogueriascolsubsidio.com/',
 						  callback= self.parse_secd,
 						  meta= {'n_cat': n_cat,

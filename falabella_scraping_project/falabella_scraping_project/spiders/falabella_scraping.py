@@ -7,6 +7,25 @@ from selenium.common.exceptions import NoSuchElementException, TimeoutException,
 
 
 from time import sleep
+from socket import gethostbyname, create_connection, error
+
+
+
+def check_connection():
+	while True:
+		try:
+			gethostbyname('google.com')
+			connection = create_connection(('google.com', 80), 1)
+			connection.close()
+			print('Hay conexion a internet, continuamos !!')
+			break
+		
+		except error:
+			print('No hay conexion a internet, esperaremos por 2 minutos')
+			sleep(120)
+			continue
+
+
 
 
 
@@ -35,7 +54,7 @@ def unic_func(url_list):
 	return new_url_list
 
 
-
+check_connection()
 
 class FalabellaScrapingSpider(Spider):
 	name = 'falabella_scraping'
@@ -49,6 +68,8 @@ class FalabellaScrapingSpider(Spider):
 		print('\n')
 		print(response.url)
 		print('\n')
+
+		check_connection()
 		driver.get(response.url)
 		
 		main_page_source = Selector(text= driver.page_source)
@@ -77,7 +98,7 @@ class FalabellaScrapingSpider(Spider):
 
 		#sleep(60)
 
-		
+		check_connection()
 		yield Request(url= response.url,
 					  callback= self.first_parse_cats,
 					  meta= {'n_cat': n_cat,
@@ -93,6 +114,7 @@ class FalabellaScrapingSpider(Spider):
 		
 		category = categories[n_cat]
 		
+		check_connection()
 		yield Request(url= 'https://www.falabella.com.co' + category,
 					  callback= self.main_parse_cats,
 					  meta= {'n_cat': n_cat, 'categories': categories},
@@ -114,6 +136,8 @@ class FalabellaScrapingSpider(Spider):
 			while trys <= 3:
 				try:
 					print('\n', '#'*15,'Estamos en el intento', trys, '#'*15, '\n') 
+					
+					check_connection()
 					driver.get(response.url)
 					break
 				except:
@@ -138,6 +162,7 @@ class FalabellaScrapingSpider(Spider):
 					driver.execute_script('document.body.style.MozTransformOrigin = "0 0";')
 					driver.execute_script("window.scrollTo(0, window.scrollY - 10000)")
 				except:
+					check_connection()
 					driver.refresh()
 					sleep(5)
 					driver.execute_script('document.body.style.MozTransform = "scale(0.3)";')
@@ -214,6 +239,7 @@ class FalabellaScrapingSpider(Spider):
 
 					n += 1
 					if cache_list[0] == cache_list[1]:
+						check_connection()
 						driver.refresh()
 
 					if n > 1:
@@ -231,6 +257,7 @@ class FalabellaScrapingSpider(Spider):
 					while trys2 <= 3:
 						try:
 							print('\n', '#'*15,'FALLO EL CLICK, ¡ COMENZAMOS !', '#'*15, '\n') 
+							check_connection()
 							driver.refresh()
 							break
 							
@@ -249,6 +276,7 @@ class FalabellaScrapingSpider(Spider):
 			sleep(10)
 			driver.set_page_load_timeout(45)
 
+			check_connection()
 			driver.get(cache_url)
 			sleep(10)
 
@@ -270,6 +298,7 @@ class FalabellaScrapingSpider(Spider):
 					driver.execute_script('document.body.style.MozTransformOrigin = "0 0";')
 					driver.execute_script("window.scrollTo(0, window.scrollY - 10000)")
 				except:
+					check_connection()
 					driver.refresh()
 					sleep(5)
 					driver.execute_script('document.body.style.MozTransform = "scale(0.3)";')
@@ -337,6 +366,7 @@ class FalabellaScrapingSpider(Spider):
 
 					n += 1
 					if cache_list[0] == cache_list[1]:
+						check_connection()
 						driver.refresh()
 
 					if n > 1:
@@ -354,7 +384,8 @@ class FalabellaScrapingSpider(Spider):
 
 					while trys2 <= 3:
 						try:
-							print('\n', '#'*15,'FALLO EL CLICK, ¡ COMENZAMOS !', '#'*15, '\n') 
+							print('\n', '#'*15,'FALLO EL CLICK, ¡ COMENZAMOS !', '#'*15, '\n')
+							check_connection() 
 							driver.refresh()
 							break
 							
@@ -368,6 +399,7 @@ class FalabellaScrapingSpider(Spider):
 		if n_cat < len(categories)-1:
 			n_cat += 1
 
+			check_connection()
 			yield Request(url= response.url,
 						  callback= self.first_parse_cats,
 						  meta= {'n_cat': n_cat,

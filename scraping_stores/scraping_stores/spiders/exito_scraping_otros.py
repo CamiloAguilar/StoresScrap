@@ -7,8 +7,25 @@ from selenium.webdriver.common.keys import Keys
 
 import os
 
-from time import sleep
 from requests import get
+from time import sleep
+from socket import gethostbyname, create_connection, error
+
+
+
+def check_connection():
+	while True:
+		try:
+			gethostbyname('google.com')
+			connection = create_connection(('google.com', 80), 1)
+			connection.close()
+			print('Hay conexion a internet, continuamos !!')
+			break
+		
+		except error:
+			print('No hay conexion a internet, esperaremos por 2 minutos')
+			sleep(120)
+			continue
 
 
 def download_image(img_url, filename, path):
@@ -16,6 +33,8 @@ def download_image(img_url, filename, path):
 	except: pass
 
 	with open(path + filename, 'wb') as image:
+
+		check_connection()
 		image.write(get(img_url).content)
 
 # def wait_time()
@@ -27,6 +46,14 @@ def ext_func(prod_variable):
 		return '?'
 
 
+# self.driver = webdriver.Firefox()
+# self.driver.maximize_window()
+# sleep(10)
+# self.driver.set_page_load_timeout(45)
+
+
+check_connection()
+
 class ExitoScrapingOtrosSpider(Spider):
 	name = 'exito_scraping_otros'
 	allowed_domains = ['exito.com']
@@ -34,6 +61,8 @@ class ExitoScrapingOtrosSpider(Spider):
 
 	def start_request(self):
 		for url in start_urls:
+
+			check_connection()
 			yield Request(url = url + '/category',
 						  callback = self.parse)
 
@@ -68,6 +97,7 @@ class ExitoScrapingOtrosSpider(Spider):
 		if 'deportes' in category:
 			category = category.split('-tiempo')[0]			
 
+		check_connection()
 		yield Request(url = 'https://www.exito.com' + category,
 					  callback = self.prod_parse,
 					  meta = {'category': category,
@@ -96,6 +126,7 @@ class ExitoScrapingOtrosSpider(Spider):
 			trys_cat = 1
 			while trys_cat <= 5:
 				try:
+					check_connection()
 					self.driver.get(response.url)
 					break
 				except:
@@ -112,6 +143,7 @@ class ExitoScrapingOtrosSpider(Spider):
 			trys_cat = 1
 			while trys_cat <= 5:
 				try:
+					check_connection()
 					self.driver.get(response.url)
 					break
 				except:
@@ -134,6 +166,7 @@ class ExitoScrapingOtrosSpider(Spider):
 			trys_cat = 1
 			while trys_cat <= 5:
 				try:
+					check_connection()
 					self.driver.get(response.url)
 					break
 				except:
@@ -161,6 +194,7 @@ class ExitoScrapingOtrosSpider(Spider):
 					while trys_prod <= 5:
 						try:
 							print('\n', '#'*15, 'Intento numero ', trys_prod, '#'*15, '\n') 
+							check_connection()
 							self.driver.get(url_cat_pag)
 							break
 						except:
@@ -281,6 +315,8 @@ class ExitoScrapingOtrosSpider(Spider):
 		n_cat += 1
 		if n_cat < len(categories):
 			print('/'*20, 'Dentro del IF para pasar de categoria', '/'*20, '\n')
+			
+			check_connection()
 			yield Request(url = 'https://www.exito.com/category',
 						  callback = self.parse,
 						  meta = {'n_cat': n_cat},
