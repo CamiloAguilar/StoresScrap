@@ -3,6 +3,27 @@ from scrapy.http import Request
 
 from json import loads
 
+from time import sleep
+from socket import gethostbyname, create_connection, error
+
+
+
+def check_connection():
+	while True:
+		try:
+			gethostbyname('google.com')
+			connection = create_connection(('google.com', 80), 1)
+			connection.close()
+			print('Hay conexion a internet, continuamos !!')
+			break
+		
+		except error:
+			print('No hay conexion a internet, esperaremos por 2 minutos')
+			sleep(120)
+			continue
+
+
+check_connection()
 
 class AraScrapingSpider(Spider):
 	name = 'ara_scraping'
@@ -14,6 +35,7 @@ class AraScrapingSpider(Spider):
 		print(response.url)
 		print()
 
+		check_connection()
 		yield Request(url= 'https://api01.inoutdelivery.com.co/v1/products/by-category?business=ara.inoutdelivery.com&pointSale=&limitProducts=1000',
 					  callback= self.other_parse,
 					  dont_filter= True)

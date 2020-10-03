@@ -4,6 +4,28 @@ from scrapy.http import Request
 
 from json import loads
 
+from time import sleep
+from socket import gethostbyname, create_connection, error
+
+
+
+def check_connection():
+	while True:
+		try:
+			gethostbyname('google.com')
+			connection = create_connection(('google.com', 80), 1)
+			connection.close()
+			print('Hay conexion a internet, continuamos !!')
+			break
+		
+		except error:
+			print('No hay conexion a internet, esperaremos por 2 minutos')
+			sleep(120)
+			continue
+
+
+check_connection()
+
 
 def link_extend(url_str):
 	if url_str[-1] != '/':
@@ -40,6 +62,7 @@ class D1ScrapingSpider(Spider):
 
 			price_list = loads(json_file.read())
 
+		check_connection()
 		yield Request(url = 'https://d1.com.co/',
 					  callback= self.second_parse,
 					  meta= {'categories': categories,
@@ -67,6 +90,7 @@ class D1ScrapingSpider(Spider):
 
 		category = categories[n_cat]
 
+		check_connection()
 		yield Request(url= 'https://domicilios.tiendasd1.com/page-data/'+category+'/page-data.json',
 					  callback= self.main_parse,
 					  meta= {'categories': categories,
@@ -135,6 +159,7 @@ class D1ScrapingSpider(Spider):
 		if n_cat < len(categories)-1:
 			n_cat += 1
 
+			check_connection()
 			yield Request(url = 'https://d1.com.co/',
 					  	  callback= self.second_parse,
 					  	  meta= {'categories': categories,

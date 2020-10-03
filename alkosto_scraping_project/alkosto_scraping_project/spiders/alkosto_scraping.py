@@ -7,13 +7,29 @@ from selenium.common.exceptions import ElementClickInterceptedException
 
 from time import sleep
 
+from socket import gethostbyname, create_connection, error
+
 
 # options = webself.driver.FirefoxOptions()
 # options.add_argument('--headless')
 # self.driver = webself.driver.Firefox(options = options)
 
+def check_connection():
+	while True:
+		try:
+			gethostbyname('google.com')
+			connection = create_connection(('google.com', 80), 1)
+			connection.close()
+			print('Hay conexion a internet, continuamos !!')
+			break
+		
+		except error:
+			print('No hay conexion a internet, esperaremos por 2 minutos')
+			sleep(120)
+			continue
 
 
+check_connection()
 
 class AlkostoScrapingSpider(Spider):
 	name = 'alkosto_scraping'
@@ -48,12 +64,16 @@ class AlkostoScrapingSpider(Spider):
 
 
 		if 'hogar' not in category and 'jugueteria' not in category:
+
+			check_connection()
 			yield Request(url= category,
 						  callback= self.category_parse,
 						  meta= {'n_cat': n_cat,
 								 'categories': categories,
 								 'category': category})
 		elif 'hogar' in category:
+
+			check_connection()
 			yield Request(url= category,
 						  callback= self.home_parse,
 						  meta= {'n_cat': n_cat,
@@ -61,6 +81,8 @@ class AlkostoScrapingSpider(Spider):
 								 'category': category})
 		else:
 			n_cat += 1
+
+			check_connection()
 			yield Request(url= 'http://alkosto.com/',
 						  callback= self.parse,
 						  dont_filter= True,
@@ -79,6 +101,7 @@ class AlkostoScrapingSpider(Spider):
 
 		sub_category = sub_categories[home_n_cat]
 
+		check_connection()
 		yield Request(url= sub_category,
 					  callback= self.category_parse,
 					  meta= {'home_n_cat': home_n_cat,
@@ -153,6 +176,7 @@ class AlkostoScrapingSpider(Spider):
 			if 'hogar' in response.url:
 				category = sub_category
 
+			check_connection()
 			yield Request(url= category + '?p=' + str(pag),
 						 callback= self.category_parse,
 						 meta= {'n_cat': n_cat,
@@ -170,6 +194,8 @@ class AlkostoScrapingSpider(Spider):
 
 			if 'hogar' in response.url and home_n_cat < len(sub_categories) - 1:
 				home_n_cat += 1
+
+				check_connection()
 				yield Request(url= 'https://www.alkosto.com/hogar',
 							  callback= self.home_parse,
 							  meta = {'home_n_cat': home_n_cat,
@@ -180,6 +206,7 @@ class AlkostoScrapingSpider(Spider):
 			
 			else:
 				n_cat += 1
+				check_connection()
 				yield Request(url= 'http://alkosto.com/',
 							  callback= self.parse,
 							  dont_filter= True,
@@ -190,6 +217,7 @@ class AlkostoScrapingSpider(Spider):
 			print('\n',response.url)
 			mercado_link = response.xpath('//*[@class= "btn-ver-mas center"]/@href').extract_first()
 			
+			check_connection()
 			yield Request(url = mercado_link,
 						  callback= self.mercado_parse)
 
@@ -206,6 +234,8 @@ class AlkostoScrapingSpider(Spider):
 		while trys <= 5:
 			try:
 				print('\n','*'*10, 'INTENTO # ', trys,'*'*10, '\n')
+				
+				check_connection()
 				self.driver.get(response.url)
 				if trys <= 3:
 					sleep(3)
@@ -291,6 +321,8 @@ class AlkostoScrapingSpider(Spider):
 				if mercado_n_cat < len(buttons)-1:
 
 					mercado_n_cat += 1
+
+					check_connection()
 					yield Request(url = response.url,
 								  callback= self.mercado_parse,
 								  meta= {'mercado_n_cat': mercado_n_cat},
