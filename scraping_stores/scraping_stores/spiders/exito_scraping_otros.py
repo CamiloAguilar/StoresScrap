@@ -323,4 +323,5 @@ class ExitoScrapingOtrosSpider(Spider):
 						  dont_filter = True)
 		
 		else:
+			self.driver.quit()
 			print('SE HA TERMINADO DE EXTRAER INFO DE LA PAGINA !!')			
