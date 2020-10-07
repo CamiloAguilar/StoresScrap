@@ -129,3 +129,6 @@ dmypy.json
 .pyre/
 scraping_stores/scraping_stores/spiders/resultados/exito_data_2.csv
 *.csv
+
+# Allow
+!justoybueno_scraping_project/justoybueno_scraping_project/spiders/codigos_dane.csv

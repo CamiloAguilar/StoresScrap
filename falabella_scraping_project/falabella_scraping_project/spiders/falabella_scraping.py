@@ -71,10 +71,29 @@ class FalabellaScrapingSpider(Spider):
 
 		check_connection()
 		driver.get(response.url)
+
+		try:
+			sleep(5)
+			driver.find_element_by_css_selector('#lightbox-close').click()
+		except:
+			pass
 		
-		main_page_source = Selector(text= driver.page_source)
-		
-		gen_categories = main_page_source.xpath('.//*[@class= "ThirdLevelItems_submenuElementLiBold__1aiT_"]/@href').extract()
+		driver.find_element_by_xpath('/html/body/div[1]/nav/div[3]/div/div[2]/div/div[1]/div/span').click()
+		sleep(.5)
+		cats_buttons = driver.find_elements_by_xpath('//*[@class= "CategoryMenuDesktop-module_label-item__1MBL4"]')
+		sleep(.5)
+		gen_categories = []
+
+		for button in cats_buttons:
+			sleep(.5)
+			button.click()
+			sleep(1)
+			main_page_source = Selector(text= driver.page_source)
+			gen_categories = gen_categories + main_page_source.xpath('.//*[@class= "SubCategories-module_list-item__qkmFs SubCategories-module_highlighted__3-tzh"]/@href').extract()
+
+		# for n in gen_categories:
+		# 	print(n)
+
 		
 		gen_categories = unic_func(gen_categories)
 		gen_categories = list(dict.fromkeys(gen_categories))
@@ -94,10 +113,11 @@ class FalabellaScrapingSpider(Spider):
 				#print(cate, '----->', cate.count('?isPLP=1'), '\n')
 				categories.append(cate)
 		#print(categories)
-
+		for n in categories:
+			print(n)
 
 		#sleep(60)
-
+		#sleep(120)
 		check_connection()
 		yield Request(url= response.url,
 					  callback= self.first_parse_cats,
@@ -406,6 +426,7 @@ class FalabellaScrapingSpider(Spider):
 								 'categories': categories},
 						  dont_filter= True)            
 		else:
+			drive.quit()
 			print('\n', '='*20,'\n', 'TAL PARECE QUE SE EXTRAJO TODA LA INFORMACION DE LA PAGINA !!','\n', '='*20, '\n')
 
 
