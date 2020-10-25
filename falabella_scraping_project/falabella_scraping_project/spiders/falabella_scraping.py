@@ -80,11 +80,17 @@ class FalabellaScrapingSpider(Spider):
 		
 		driver.find_element_by_xpath('/html/body/div[1]/nav/div[3]/div/div[2]/div/div[1]/div/span').click()
 		sleep(.5)
-		cats_buttons = driver.find_elements_by_xpath('//*[@class= "CategoryMenuDesktop-module_label-item__1MBL4"]')
+		cats_buttons = driver.find_elements_by_xpath('//*[@class= "Menu-module_firstCategories"]/li/span')	
 		sleep(.5)
 		gen_categories = []
 
 		for button in cats_buttons:
+			sleep(.5)
+			button.click()
+			sleep(.5)
+			button.click()
+			sleep(.5)
+			button.click()
 			sleep(.5)
 			button.click()
 			sleep(1)
