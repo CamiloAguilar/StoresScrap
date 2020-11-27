@@ -244,7 +244,15 @@ class FalabellaScrapingSpider(Spider):
 							  '\n\tNormal price:\t', normal_price,
 							  '\n\tDiscount price:\t', disc_price)
 
-						cache_list[n].append(prod_name)
+						try:
+							cache_list[n].append(prod_name)
+							
+						except:
+							cache_list[-1].append(prod_name)
+
+							if n > 1:
+								n = 0
+								cache_list = ([], [])
 
 
 						yield {'cat_name': cat_name,
