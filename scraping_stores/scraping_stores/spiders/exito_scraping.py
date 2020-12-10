@@ -57,14 +57,14 @@ check_connection()
 class ExitoScrapingSpider(Spider):
 	name = 'exito_scraping'
 	allowed_domains = ['exito.com']
-	start_urls = ['http://www.exito.com/category']
+	start_urls = ['http://www.exito.com/categories']
 
 
 	def start_request(self):
 		for url in start_urls:
 
 			check_connection()
-			yield Request(url = url + '/category',
+			yield Request(url = url + '/categories',
 						  callback = self.parse)
 
 
@@ -93,6 +93,8 @@ class ExitoScrapingSpider(Spider):
 
 		print(categories)
 
+		sleep(30)
+
 		category = categories[n_cat]
 
 		if 'deportes' in category:
@@ -119,8 +121,25 @@ class ExitoScrapingSpider(Spider):
 
 		if 'mercado' in category:
 			prod_types = response.xpath('//*[@class = "exito-home-components-1-x-containerCarouselGrid"]/a/@href').extract()[2:]
-		
+			
+			trys_cat = 1
+			while trys_cat <= 5:
+				try:
+					check_connection()
+					self.driver.get(response.url)
+					break
+				except:
+					trys_cat += 1
+			prod_types = Selector(text= self.driver.page_source)
+			prod_types = prod_types.xpath('//*[@class = "exito-home-components-1-x-containerCarouselGrid"]/a/@href').extract()[2:]
 
+			print
+			print("Estas en el if de mercado")
+
+			for n in prod_types:
+				print(n)
+
+			sleep(60)
 
 
 		elif 'salud' in category or 'deportes' in category:
