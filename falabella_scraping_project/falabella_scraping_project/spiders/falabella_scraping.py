@@ -140,6 +140,10 @@ class FalabellaScrapingSpider(Spider):
 		
 		category = categories[n_cat]
 		
+		print("####################################### Category ####################################")
+		print(category, '----------------------------- category')
+		print('#####################################################################################')
+
 		check_connection()
 		yield Request(url= 'https://www.falabella.com.co' + category,
 					  callback= self.main_parse_cats,
@@ -151,11 +155,36 @@ class FalabellaScrapingSpider(Spider):
 
 
 	def main_parse_cats(self, response):
+
+		print("####################################### main parse ####################################")
+		print(response.url, '----------------------------- response url')
+		print('#####################################################################################')
+
+
+		# categories = response.meta['categories']
+		# n_cat = response.meta['n_cat']
+		# if response.status == 404:
+		# 	if n_cat < len(categories)-1:
+		# 		n_cat += 1
+
+		# 		check_connection()
+		# 		yield Request(url= response.url,
+		# 					  callback= self.first_parse_cats,
+		# 					  meta= {'n_cat': n_cat,
+		# 							 'categories': categories},
+		# 					  dont_filter= True)  
+
+
+
 		
 		global driver
 		try:
 			categories = response.meta['categories']
 			n_cat = response.meta['n_cat']
+
+
+
+
 
 			trys= 1
 
@@ -217,10 +246,10 @@ class FalabellaScrapingSpider(Spider):
 				try:
 					for prod in prods:
 
-						prod_name = prod.xpath('.//b[@class= "jsx-3773340100 copy2 primary  jsx-185326735 normal    pod-subTitle"]/text()').extract_first()
+						prod_name = prod.xpath('.//b[@class= "jsx-287641535 title2 primary  jsx-3736277290 bold     pod-subTitle"]/text()').extract_first()
 
 						if prod_name == None:
-							prod_name = prod.xpath('.//b[@class= "jsx-287641535 title2 primary  jsx-185326735 bold    pod-subTitle"]/text()').extract_first()
+							prod_name = prod.xpath('.//b[@class= "jsx-2370503784 copy2 primary  jsx-3736277290 normal     pod-subTitle"]/text()').extract_first()
 
 						if prod_name == None:
 							prod_name = prod.xpath('.//b[@class= "jsx-3773340100 copy13 primary  jsx-185326735 normal    pod-subTitle"]/text()').extract_first()
@@ -361,10 +390,10 @@ class FalabellaScrapingSpider(Spider):
 				try:
 					for prod in prods:
 
-						prod_name = prod.xpath('.//b[@class= "jsx-3773340100 copy2 primary  jsx-185326735 normal    pod-subTitle"]/text()').extract_first()
+						prod_name = prod.xpath('.//b[@class= "jsx-287641535 title2 primary  jsx-3736277290 bold     pod-subTitle"]/text()').extract_first()
 
 						if prod_name == None:
-							prod_name = prod.xpath('.//b[@class= "jsx-287641535 title2 primary  jsx-185326735 bold    pod-subTitle"]/text()').extract_first()
+							prod_name = prod.xpath('.//b[@class= "jsx-2370503784 copy2 primary  jsx-3736277290 normal     pod-subTitle"]/text()').extract_first()
 
 						if prod_name != None:
 							prod_name = prod_name.replace('\n', '')
@@ -440,7 +469,7 @@ class FalabellaScrapingSpider(Spider):
 								 'categories': categories},
 						  dont_filter= True)            
 		else:
-			drive.quit()
+			driver.quit()
 			print('\n', '='*20,'\n', 'TAL PARECE QUE SE EXTRAJO TODA LA INFORMACION DE LA PAGINA !!','\n', '='*20, '\n')
 
 

@@ -12,6 +12,9 @@ BOT_NAME = 'falabella_scraping_project'
 SPIDER_MODULES = ['falabella_scraping_project.spiders']
 NEWSPIDER_MODULE = 'falabella_scraping_project.spiders'
 
+HTTPERROR_ALLOWED_CODES = [404]
+#RETRY_HTTP_CODES = [502, 503, 504, 400, 408, 500]
+#RETRY_TIMES = 25
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'falabella_scraping_project (+http://www.yourdomain.com)'
