@@ -334,6 +334,13 @@ class FalabellaScrapingSpider(Spider):
 		except WebDriverException:
 			print('Entra al except que es !! ---------------------------------')
 
+			try:
+				while True:
+					driver.quit()
+					break
+			except:
+				pass
+
 			driver = webdriver.Firefox()
 			driver.maximize_window()
 			sleep(10)
