@@ -57,13 +57,13 @@ check_connection()
 class ExitoScrapingElecYHogarSpider(Spider):
 	name = 'exito_scraping_elec_y_hogar'
 	allowed_domains = ['exito.com']
-	start_urls = ['http://www.exito.com/category']
+	start_urls = ['http://www.exito.com/categories']
 
 	def start_request(self):
 		for url in start_urls:
 
 			check_connection()
-			yield Request(url = url + '/category',
+			yield Request(url = url + '/categories',
 						  callback = self.parse)
 
 
@@ -317,7 +317,7 @@ class ExitoScrapingElecYHogarSpider(Spider):
 			print('/'*20, 'Dentro del IF para pasar de categoria', '/'*20, '\n')
 			
 			check_connection()
-			yield Request(url = 'https://www.exito.com/category',
+			yield Request(url = 'https://www.exito.com/categories',
 						  callback = self.parse,
 						  meta = {'n_cat': n_cat},
 						  dont_filter = True)
