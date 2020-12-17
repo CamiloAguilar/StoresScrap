@@ -150,18 +150,23 @@ class ExitoScrapingRopaSpider(Spider):
 				except:
 					trys_cat += 1
 			
-			page_body = Selector(text= self.driver.page_source)
 
-			list_1 = page_body.xpath('//*[@class= "diagramacion-outfit w-100 flex-m flex-column-s flex-row-l "]//a/@href').extract()
-			list_2 = page_body.xpath('//*[@class= "pt5-l pt1-s w-100 flex-wrap-s flex-nowrap-l diagramacion-outfit flex justify-between  "]//a/@href').extract()
-			
-			list_3 = page_body.xpath('//*[@class= "exito-home-components-1-x-carouselByScroll flex"]')[1:]
-			list_3 =  list_3.xpath('.//a/@href').extract()
+			pestañas = self.driver.find_elements_by_xpath('//*[@class="exito-components-4-x-tab"]')
 
-			prod_types = 	prod_types + list_1 + list_2 + list_3 
+			for pestaña in pestañas[:-1]:
+				sleep(1.5)
+				pestaña.click()
+				sleep(3)
 
+				page_body = Selector(text= self.driver.page_source)
 
+				prendas_links = page_body.xpath('//*[@class="exito-home-components-1-x-containerCarouselGrid"]')[0].xpath('.//a/@href').extract()
+				prod_types = prod_types + prendas_links 
 
+			for n in prod_types:
+				print(n)
+
+			#sleep(480)
 
 		else:
 			trys_cat = 1
