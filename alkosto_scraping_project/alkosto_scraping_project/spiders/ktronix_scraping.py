@@ -82,8 +82,10 @@ class KtronixScrapingSpider(Spider):
 			print_(str(i)+'   '+str(n))
 
 		category = categories[n_cat] 
-
-
+		print()
+		print(category, '--------------------------------> categoria')
+		print()
+		
 		check_connection()
 		yield Request(url= category,
 					  callback= self.category_parse,
@@ -98,6 +100,8 @@ class KtronixScrapingSpider(Spider):
 		categories = response.meta['categories']
 		
 		category = categories[n_cat]
+
+		print(category, '--------------------------------> categoria')
 
 		check_connection()
 		yield Request(url= category,
@@ -121,25 +125,34 @@ class KtronixScrapingSpider(Spider):
 
 		pag = 1
 
-		print_()
-		print_(response.url)
-		print_()
+		print()
+		print(response.url)
+		print()
 		print_(response.status)
 		print_()
 
-		sub_categories = response.xpath('//*[@class= "col-4 col-xs-12"]//a/@href').extract()
-		sub_categories = list(dict.fromkeys(sub_categories))
-		print(sub_categories, '--------------------------------------------------> sub_categories')
-		sleep(20)
-		sub_category = sub_categories[n_subcat].replace('../..', '')
+		sub_categories = response.xpath('.//*[@class= "col-4 col-xs-12"]//a/@href').extract()
+		
+		if sub_categories != []:
 
-		print()
-		print(sub_category)
-		print()
+			print(sub_categories, '-----------------------------> Otro control')
+			sub_categories = list(dict.fromkeys(sub_categories))
+			print(sub_categories, '--------------------------------------------------> sub_categories')
+			#sleep(20)
+			sub_category = sub_categories[n_subcat].replace('../..', '')
 
-		if sub_category[0] != '/':
-			sub_category = '/' + sub_category
+			print()
+			print(sub_category)
+			print()
 
+			if sub_category[0] != '/':
+				sub_category = '/' + sub_category
+
+		else:
+			sub_categories = [response.url]
+			sub_category = sub_categories[n_subcat].split('.com')[-1]
+
+		print(sub_category, '-------------------------> antes de pasar subcategories')
 
 		size = 25
 		
@@ -177,10 +190,10 @@ class KtronixScrapingSpider(Spider):
 		test_2 = []
 
 		prods = response.xpath('//*[@class= "product__listing product__list"]/li')
-		cat_name = response.xpath('//*[@class= "col-xs-12 component__title"]/h1/text()').extract_first()
+		cat_name = response.xpath('//*[@class= "d-flex component__title"]/h1/text()').extract_first()
 		try:
 			if cat_name != []:
-				cat_name = response.xpath('//*[@class= "col-xs-12 component__title"]/h1/text()').extract_first().strip()
+				cat_name = response.xpath('//*[@class= "d-flex component__title"]/h1/text()').extract_first().strip()
 			else: 
 				cat_name = None
 		except:
@@ -202,12 +215,30 @@ class KtronixScrapingSpider(Spider):
 
 			normal_price = prod.xpath('.//*[@class= "product__price"]//*[@class= "product__price--discounts__old "]/text()').extract()
 
+			flex = False
+			if normal_price == []:
+				normal_price = prod.xpath('.//*[@class= "product__price product__price--flex"]//*[@class= "product__price--discounts__old "]/text()').extract()
+				flex = True
+
+
+			print(normal_price, '----------------------------> normal price')
+
 			if normal_price != []:
-				disc_price = prod.xpath('.//*[@class= "product__price"]//*[@class= "product__price--discounts__price"]/span[@class= "price"]/text()').extract_first().strip()
-				normal_price = prod.xpath('.//*[@class= "product__price"]//*[@class= "product__price--discounts__old "]/text()').extract_first().strip()
+				if flex == True:
+					disc_price = prod.xpath('.//*[@class= "product__price product__price--flex"]//*[@class= "product__price--discounts__price"]/span[@class= "price"]/text()').extract_first().strip()
+					normal_price = prod.xpath('.//*[@class= "product__price product__price--flex"]//*[@class= "product__price--discounts__old "]/text()').extract_first().strip()
+				
+				else:
+					disc_price = prod.xpath('.//*[@class= "product__price"]//*[@class= "product__price--discounts__price"]/span[@class= "price"]/text()').extract_first().strip()
+					normal_price = prod.xpath('.//*[@class= "product__price"]//*[@class= "product__price--discounts__old "]/text()').extract_first().strip()
 			else:
-				disc_price = prod.xpath('.//*[@class= "product__price"]//*[@class= "product__price--discounts__price"]/span[@class= "price"]/text()').extract_first().strip()
-				normal_price = disc_price
+				if flex == True:
+					disc_price = prod.xpath('.//*[@class= "product__price product__price--flex"]//*[@class= "product__price--discounts__price"]/span[@class= "price"]/text()').extract_first().strip()
+					normal_price = disc_price
+				
+				else:
+					disc_price = prod.xpath('.//*[@class= "product__price"]//*[@class= "product__price--discounts__price"]/span[@class= "price"]/text()').extract_first().strip()
+					normal_price = disc_price
 
 			image_url = prod.xpath('.//*[@class= "product__image"]//*[@class= "product__image__container"]/img/@data-src').extract()
 
