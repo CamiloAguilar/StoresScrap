@@ -57,13 +57,13 @@ check_connection()
 class ExitoScrapingOtrosSpider(Spider):
 	name = 'exito_scraping_otros'
 	allowed_domains = ['exito.com']
-	start_urls = ['http://www.exito.com/categories']
+	start_urls = ['http://www.exito.com']
 
 	def start_request(self):
 		for url in start_urls:
 
 			check_connection()
-			yield Request(url = url + '/categories',
+			yield Request(url = url,
 						  callback = self.parse)
 
 
@@ -86,7 +86,16 @@ class ExitoScrapingOtrosSpider(Spider):
 		print(response.url)
 		print('\n', '*'*40, '\n')
 
-		categories = response.xpath('//*[@class = "fl w-30"]//a/@href').extract()
+
+
+		self.driver.get('https://www.exito.com/')
+		sleep(10)
+		categories_page_sel = Selector(text= self.driver.page_source)
+		categories = categories_page_sel.xpath('.//*[@class="exito-home-components-1-x-carouselByScroll flex"]//a/@href').extract()
+
+		
+
+
 
 		categories = [url for url in categories if 'mercado' not in url and 'tecnologia' not in url and 'electrodomesticos' not in url and 'hogar' not in url and 'moda' not in url]
 
@@ -200,16 +209,39 @@ class ExitoScrapingOtrosSpider(Spider):
 						except:
 							print('\n', '#'*15, 'Fallo intento', '#'*15, '\n')
 							trys_prod +=1
-							
-					pag_sel = Selector(text= self.driver.page_source)
 					
+
+					sleep(2)					
+					self.driver.execute_script('document.body.style.MozTransform = "scale(0.3)";')
+					self.driver.execute_script('document.body.style.MozTransformOrigin = "0 0";')
+					self.driver.execute_script("window.scrollTo(0, window.scrollY + 3)")
+					sleep(3)		
+					
+
+					pag_sel = Selector(text= self.driver.page_source)
 					print('Antes de dormir')
-					sleep(15)
-					self.driver.execute_script('window.scrollTo(0,document.body.scrollHeight)')
+					
+
+					sleep(10)
+					for n in range(5):
+						self.driver.execute_script('window.scrollTo(0,window.scrollY + 100)')
+						sleep(1)
+
+					for n in range(7):
+						self.driver.execute_script('window.scrollTo(0,window.scrollY - 60)')
+						sleep(1)
+
+
 					print('Despues de dormir')
-					sleep(5)
+					#sleep(5)
+					
 					cat_name = pag_sel.xpath('.//*[@class= "vtex-breadcrumb-1-x-container pv3"]/span/a/text()').extract()
 					
+					if cat_name == []:
+						pag_sel = Selector(text= self.driver.page_source)
+						cat_name = pag_sel.xpath('.//*[@class= "vtex-breadcrumb-1-x-container pv3"]/span/a/text()').extract()
+
+
 					print('$'*40)
 					print(cat_name)
 					print('$'*40)
@@ -317,7 +349,7 @@ class ExitoScrapingOtrosSpider(Spider):
 			print('/'*20, 'Dentro del IF para pasar de categoria', '/'*20, '\n')
 			
 			check_connection()
-			yield Request(url = 'https://www.exito.com/categories',
+			yield Request(url = 'https://www.exito.com',
 						  callback = self.parse,
 						  meta = {'n_cat': n_cat},
 						  dont_filter = True)

@@ -103,7 +103,8 @@ class ColsubsidioScrapingSpider(Spider):
 
 		print('Antes del click')
 		while True:
-			self.driver.find_element_by_css_selector('.vtex-flex-layout-0-x-flexColChild--search-out-categories-right-container > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > section:nth-child(1) > button:nth-child(2)').click()
+			sleep(2)
+			self.driver.find_element_by_css_selector('.vtex-slider-layout-0-x-sliderRightArrow--search-out-categories-items-container > svg:nth-child(1)').click()
 			
 			main_page_sel = Selector(text= self.driver.page_source)
 			categories = main_page_sel.xpath('//*[@class= "vtex-store-components-3-x-imageElementLink"]/@href').extract()
@@ -158,6 +159,8 @@ class ColsubsidioScrapingSpider(Spider):
 		print()
 
 
+		#self.driver.get(response.url)
+		#sleep(5)
 		n_cat = response.meta['n_cat']
 		categories = response.meta['categories']
 		pag = response.meta['pag']
@@ -173,21 +176,31 @@ class ColsubsidioScrapingSpider(Spider):
 
 		button_next = response.xpath('//*[@class= "vtex-button__label flex items-center justify-center h-100 ph5 "]/text()').extract()
 
-		if '.com/26' in response.url:
-			check_connection()
-			self.driver.get(response.url)
+		#if '.com/26' in response.url:
+		check_connection()
+		self.driver.get(response.url)
+		sleep(3)
+		self.driver.execute_script('document.body.style.MozTransform = "scale(0.3)";')
+		self.driver.execute_script('document.body.style.MozTransformOrigin = "0 0";')
+		self.driver.execute_script("window.scrollTo(0, window.scrollY + 3)")
+		sleep(5)
+
+		trys_prods = 0
+
+		while trys_prods <= 5:
 			sleep(3)
-			self.driver.execute_script('document.body.style.MozTransform = "scale(0.3)";')
-			self.driver.execute_script('document.body.style.MozTransformOrigin = "0 0";')
-			self.driver.execute_script("window.scrollTo(0, window.scrollY + 3)")
-			sleep(5)
-
 			cat_page_sel = Selector(text= self.driver.page_source)
-
 			prods = cat_page_sel.xpath('//*[@class= "vtex-search-result-3-x-gallery flex flex-row flex-wrap items-stretch bn ph1 na4 pl9-l"]/div')
-			cat_name= cat_page_sel.xpath('//*[@class= "vtex-search-result-3-x-galleryTitle--layout t-heading-1"]/text()').extract_first()
+			
+			if prods == []:
+				trys_prods += 1
+				continue
+			else:
+				break
 
-			button_next = cat_page_sel.xpath('//*[@class= "vtex-button__label flex items-center justify-center h-100 ph5 "]/text()').extract()
+		cat_name= cat_page_sel.xpath('//*[@class= "vtex-search-result-3-x-galleryTitle--layout t-heading-1"]/text()').extract_first()
+
+		button_next = cat_page_sel.xpath('//*[@class= "vtex-button__label flex items-center justify-center h-100 ph5 "]/text()').extract()
 
 
 
@@ -196,9 +209,25 @@ class ColsubsidioScrapingSpider(Spider):
 
 			normal_price = prod.xpath('.//*[@class= "flex mt0 mb0 pt0 pb0    justify-start  vtex-flex-layout-0-x-flexRowContent items-stretch w-100"]/div/span//text()').extract() 
 
+			print('*'*50)
+			print(normal_price)
+			print('*'*50)
+
+
+
 			if normal_price != []:
 				disc_price = normal_price[0]
-				normal_price = normal_price[-1]
+
+				if len(normal_price) > 3:
+					normal_price_str = ''
+					for n in normal_price[-3:]:
+						normal_price_str = normal_price_str + n
+
+					normal_price = normal_price_str
+				
+				else:
+					normal_price = normal_price[-1]
+
 			else:
 				disc_price = 0
 				normal_price = 0 
@@ -220,8 +249,13 @@ class ColsubsidioScrapingSpider(Spider):
 				   'disc_price': disc_price,
 				   'image_url': image_url}
 
+		print()
+		print()
+		print('Se supone que ya se deben ver los productos')
+		print()
+		print()
+		#sleep(60)
 
-		
 		test = next_button_func(button_next)
 
 
