@@ -89,7 +89,12 @@ class ExitoScrapingElecYHogarSpider(Spider):
 		self.driver.get('https://www.exito.com/')
 		sleep(10)
 		categories_page_sel = Selector(text= self.driver.page_source)
-		categories = categories_page_sel.xpath('.//*[@class="exito-home-components-1-x-carouselByScroll flex"]//a/@href').extract()
+		
+		categories = categories_page_sel.xpath('//*[@class="exito-home-components-1-x-containerCarouselGrid"]//a/@href').extract()
+		if categories == []:	
+			categories = categories_page_sel.xpath('//*[@class="exito-home-components-1-x-carouselByScroll flex"]//a/@href').extract()
+
+		# import pdb; pdb.set_trace()
 
 		categories = [url for url in categories if 'electrodomesticos' in url or 'hogar' in url]
 
@@ -259,7 +264,7 @@ class ExitoScrapingElecYHogarSpider(Spider):
 
 						for producto in productos: 
 							try:
-								prod_name = producto.xpath('.//*[@class= "vtex-store-components-3-x-productNameContainer mv0 test"]/span/text()').extract_first()
+								prod_name = producto.xpath('.//*[@class= "exito-product-summary-3-x-nameContainer undefined "]//text()').extract_first()
 								prod_name = prod_name.replace('\\', '.')
 								prod_name = prod_name.replace('/', '.')
 
@@ -313,6 +318,7 @@ class ExitoScrapingElecYHogarSpider(Spider):
 
 							elif type(cat_name) == str:
 								cat_name = cat_name
+
 							else :
 								cat_name = cache['cat_name'][0]
 
