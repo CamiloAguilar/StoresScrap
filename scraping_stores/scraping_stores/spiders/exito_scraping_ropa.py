@@ -282,7 +282,7 @@ class ExitoScrapingRopaSpider(Spider):
 
 						for producto in productos: 
 							try:
-								prod_name = producto.xpath('.//*[@class= "vtex-store-components-3-x-productNameContainer mv0 test"]/span/text()').extract_first()
+								prod_name = producto.xpath('.//*[@class= "exito-product-summary-3-x-nameContainer undefined "]//text()').extract_first()
 								prod_name = prod_name.replace('\\', '.')
 								prod_name = prod_name.replace('/', '.')
 
